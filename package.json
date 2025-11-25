@@ -1,6 +1,6 @@
 {
-  "name": "use-synced-storage",
-  "version": "1.0.0",
+  "name": "synced-storage",
+  "version": "0.0.1",
   "description": "",
   "keywords": [],
   "author": "jeheecheon",
@@ -11,11 +11,9 @@
     "build": "tsup",
     "clean": "rm -rf dist"
   },
-  "main": "index.js",
-  "workspaces": [
-    ".",
-    "example"
-  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
