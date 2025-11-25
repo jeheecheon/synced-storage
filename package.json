@@ -1,0 +1,36 @@
+{
+  "name": "use-synced-storage",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "jeheecheon",
+  "license": "MIT",
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
+    }
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "universal-cookie": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}
