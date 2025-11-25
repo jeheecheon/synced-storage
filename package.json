@@ -7,17 +7,25 @@
   "license": "MIT",
   "packageManager": "pnpm@10.18.3",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "clean": "rm -rf dist"
   },
   "main": "index.js",
+  "workspaces": [
+    ".",
+    "example"
+  ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./core": {
-      "import": "./dist/core/index.js",
-      "require": "./dist/core/index.cjs"
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
     }
   },
   "dependencies": {

@@ -5,3 +5,7 @@ export function safelyGet<T>(callback: () => T): T | undefined {
     return undefined;
   }
 }
+
+export function isFunction(value: any): value is (...args: any[]) => any {
+  return typeof value === "function";
+}

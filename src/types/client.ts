@@ -10,21 +10,17 @@ export type Storage<Value = any> = {
   setValue: (value: Value) => void;
 };
 
-export interface StorageOption {
-  strategy: "cookie" | "localStorage" | "sessionStorage";
+export interface StrategyOption {
+  strategy?: "cookie" | "localStorage" | "sessionStorage";
 }
-
-export interface CookieStorageOption extends StorageOption, CookieSetOptions {}
-export interface LocalStorageOption extends StorageOption {
-  expires?: Date;
-}
-export interface SessionStorageOption extends StorageOption {
-  expires?: Date;
-}
+export interface BaseCookieStorageOption extends CookieSetOptions {}
+export interface CookieStorageOption
+  extends StrategyOption,
+    BaseCookieStorageOption {}
 
 export type StorageClient<Value = any> = {
   storageCache: Map<string, Readonly<Storage<Value>>>;
-  getOrCreateStorage<TStorageOption extends StorageOption>(
+  getOrCreateStorage<TStorageOption extends StrategyOption>(
     key: string,
     defaultValue: Value,
     options?: TStorageOption
