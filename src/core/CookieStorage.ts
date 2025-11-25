@@ -1,14 +1,14 @@
-import {
+import type {
   CookieStorageOption,
   Listener,
   Storage,
   Unsubscriber,
 } from "@/types/client";
-import { Optional } from "@/types/misc";
+import { type Optional } from "@/types/misc";
 import { safelyGet } from "@/utils/misc";
-import Cookies, { CookieChangeOptions } from "universal-cookie";
+import Cookies, { type CookieChangeOptions } from "universal-cookie";
 
-export class CookieStorage<Value = any> implements Storage<Value> {
+export class CookieStorage<Value> implements Storage<Value> {
   private readonly cookies: Cookies;
   private readonly name: string;
   private readonly defaultValue: Value;
@@ -46,7 +46,7 @@ export class CookieStorage<Value = any> implements Storage<Value> {
     return () => this.cookies.removeChangeListener(handler);
   }
 
-  public getSnapshot(): Value {
+  public getValue(): Value {
     if (this.cachedValue === undefined) {
       const raw = this.cookies.get(this.name);
       const deserialized = safelyGet<Value>(() => JSON.parse(raw));
@@ -56,7 +56,7 @@ export class CookieStorage<Value = any> implements Storage<Value> {
     return this.cachedValue ?? this.defaultValue;
   }
 
-  public getServerSnapshot(): Value {
+  public getInitialValue(): Value {
     return this.initialValue ?? this.defaultValue;
   }
 

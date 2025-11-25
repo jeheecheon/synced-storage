@@ -1,13 +1,19 @@
-import { CookieStorageOption, Storage, StorageClient } from "@/types/client";
+import {
+  type CookieStorageOption,
+  type Storage,
+  StorageClient,
+} from "@/types/client";
 import { safelyGet } from "@/utils/misc";
 import { CookieStorage } from "@/core";
 
-export class CookieClient implements StorageClient {
-  private initialCookies: CookieListItem[];
-  public storageCache: Map<string, Readonly<Storage>> = new Map();
+export class CookieClient extends StorageClient {
+  private readonly initialCookies: CookieListItem[];
+  protected readonly storageCache: Map<string, Readonly<Storage>>;
 
   constructor(initialCookies: CookieListItem[]) {
+    super();
     this.initialCookies = initialCookies;
+    this.storageCache = new Map();
   }
 
   public getOrCreateStorage<

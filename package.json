@@ -1,6 +1,6 @@
 {
   "name": "synced-storage",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "keywords": [],
   "author": "jeheecheon",
@@ -17,13 +17,11 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./core": {
       "import": "./dist/core/index.mjs",
-      "require": "./dist/core/index.js",
-      "types": "./dist/core/index.d.ts"
+      "require": "./dist/core/index.js"
     }
   },
   "dependencies": {
@@ -37,6 +35,6 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "react": ">=18.0.0"
+    "react": ">=16.8.0"
   }
 }

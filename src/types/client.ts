@@ -5,8 +5,8 @@ export type Unsubscriber = () => void;
 
 export type Storage<Value = any> = {
   subscribe: (listener: Listener) => Unsubscriber;
-  getSnapshot: () => Value;
-  getServerSnapshot: () => Value;
+  getValue: () => Value;
+  getInitialValue: () => Value;
   setValue: (value: Value) => void;
 };
 
@@ -18,11 +18,14 @@ export interface CookieStorageOption
   extends StrategyOption,
     BaseCookieStorageOption {}
 
-export type StorageClient<Value = any> = {
-  storageCache: Map<string, Readonly<Storage<Value>>>;
-  getOrCreateStorage<TStorageOption extends StrategyOption>(
+export abstract class StorageClient<Value = unknown> {
+  protected abstract readonly storageCache: Map<
+    string,
+    Readonly<Storage<Value>>
+  >;
+  public abstract getOrCreateStorage<TStorageOption extends StrategyOption>(
     key: string,
     defaultValue: Value,
     options?: TStorageOption
   ): Readonly<Storage<Value>>;
-};
+}

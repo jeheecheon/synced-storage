@@ -1,17 +1,15 @@
 "use client";
 
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useSyncExternalStore,
-  type SetStateAction,
-} from "react";
+import { useContext, useEffect, useState } from "react";
 import { BaseCookieStorageOption } from "@/types/client";
-import { isFunction } from "@/utils/misc";
-import { CookieClientContext } from "./CookieClientProvider";
+import { CookieClientContext } from "@/react";
+import { compareDeep } from "@/utils/misc";
 
-function useCookieStorage<TValue>(key: string, defaultValue: TValue) {
+function useCookieStorage<TValue>(
+  key: string,
+  defaultValue: TValue,
+  option?: BaseCookieStorageOption
+) {
   const context = useContext(CookieClientContext);
 
   if (!context) {
@@ -20,34 +18,28 @@ function useCookieStorage<TValue>(key: string, defaultValue: TValue) {
     );
   }
 
-  return context.client.getOrCreateStorage(key, defaultValue);
+  return context.client.getOrCreateStorage(key, defaultValue, option);
 }
 
 export function useCookieState<TValue>(
   key: string,
   defaultValue: TValue,
-  options?: BaseCookieStorageOption
+  option?: BaseCookieStorageOption
 ) {
-  const storage = useCookieStorage(key, defaultValue);
+  const storage = useCookieStorage(key, defaultValue, option);
 
-  const state = useSyncExternalStore(
-    (listener) => storage.subscribe(listener),
-    () => storage.getSnapshot(),
-    () => storage.getServerSnapshot()
-  );
-  const setState = useCallback(
-    (action: SetStateAction<TValue>) => {
-      const prev = storage.getSnapshot();
-      const next = isFunction(action) ? action(prev) : action;
-      storage.setValue(next);
-    },
-    [key, options]
-  );
+  const [state, setState] = useState(storage.getInitialValue());
 
   useEffect(() => {
-    // NOTE: ensure the cookie is set with provided options
-    setState(state);
-  }, [key, options]);
+    return storage.subscribe(() => {
+      const newState = storage.getValue();
+      if (compareDeep(newState, state)) {
+        return;
+      }
+
+      storage.setValue(newState);
+    });
+  }, [state]);
 
   return [state, setState] as const;
 }
