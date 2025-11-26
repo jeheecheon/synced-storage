@@ -1,6 +1,6 @@
 "use client";
 
-import { useCookieState } from "@/react/useCookieState";
+import { useCookieState } from "synced-storage/react";
 
 type CountAndName = {
   count: number;

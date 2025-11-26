@@ -18,10 +18,9 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["../src/*"],
-      "use-synced-storage": ["../src/index.ts"],
-      "use-synced-storage/*": ["../src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [

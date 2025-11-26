@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import CookieStatePreview from "../components/CookieStatePreview";
+import CookieStatePreview from "@/components/CookieStatePreview";
 
 const Home: FC = () => {
   return (
