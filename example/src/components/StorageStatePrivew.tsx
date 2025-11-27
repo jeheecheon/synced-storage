@@ -1,21 +1,21 @@
 "use client";
 
-import { useCookieState } from "synced-storage/react";
+import { useStorageState } from "synced-storage/react";
 
 type CountAndName = {
   count: number;
   name: string;
 };
 
-const CookieStatePreview = () => {
-  const [countAndName, setCountAndName] = useCookieState<CountAndName>(
+const StorageStatePreview = () => {
+  const [countAndName, setCountAndName] = useStorageState<CountAndName>(
     "countAndName",
     { count: 0, name: "John" }
   );
 
   return (
     <div className="space-y-4">
-      <h1>Cookie State Preview</h1>
+      <h1>Storage State Preview</h1>
       <div>
         <button onClick={handleIncrementCount}>Increment</button>
         <p>Count: {countAndName.count}</p>
@@ -29,4 +29,4 @@ const CookieStatePreview = () => {
   }
 };
 
-export default CookieStatePreview;
+export default StorageStatePreview;

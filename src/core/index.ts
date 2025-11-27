@@ -1,2 +1,2 @@
-export * from "@/core/CookieStorage";
+export * from "@/core/CookieStore";
 export * from "@/core/CookieClient";

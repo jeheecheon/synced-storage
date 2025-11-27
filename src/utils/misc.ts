@@ -14,3 +14,11 @@ export function compareDeep(a: any, b: any): boolean {
   // TODO: replace this with actual deep comparison
   return JSON.stringify(a) === JSON.stringify(b);
 }
+
+export function isServer(): boolean {
+  return typeof window !== "object";
+}
+
+export function isBrowser(): boolean {
+  return typeof window === "object";
+}

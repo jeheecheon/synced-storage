@@ -1,14 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { BaseCookieStorageOption } from "@/types/client";
+import {
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { CookieClientContext } from "@/react";
-import { compareDeep } from "@/utils/misc";
+import { compareDeep, isFunction } from "@/utils/misc";
+import { CookieStoreOption } from "@/types";
 
-function useCookieStorage<TValue>(
+function useCookieStore<TValue>(
   key: string,
   defaultValue: TValue,
-  option?: BaseCookieStorageOption
+  option?: CookieStoreOption
 ) {
   const context = useContext(CookieClientContext);
 
@@ -18,28 +24,36 @@ function useCookieStorage<TValue>(
     );
   }
 
-  return context.client.getOrCreateStorage(key, defaultValue, option);
+  return context.client.getOrCreateStore(key, defaultValue, option);
 }
 
 export function useCookieState<TValue>(
   key: string,
   defaultValue: TValue,
-  option?: BaseCookieStorageOption
+  option?: CookieStoreOption
 ) {
-  const storage = useCookieStorage(key, defaultValue, option);
+  const store = useCookieStore(key, defaultValue, option);
 
-  const [state, setState] = useState(storage.getInitialValue());
+  const [state, _setState] = useState(store.getInitialItem());
+  const setState = useCallback(
+    (action: SetStateAction<TValue>) => {
+      const nextState = isFunction(action) ? action(state) : action;
+      store.setItem(nextState);
+      _setState(nextState);
+    },
+    [store, state]
+  );
 
   useEffect(() => {
-    return storage.subscribe(() => {
-      const newState = storage.getValue();
+    return store.subscribe(() => {
+      const newState = store.getItem();
       if (compareDeep(newState, state)) {
         return;
       }
 
-      storage.setValue(newState);
+      _setState(newState);
     });
-  }, [state]);
+  }, [store, state]);
 
   return [state, setState] as const;
 }

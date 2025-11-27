@@ -3,29 +3,27 @@ import { CookieSetOptions } from "universal-cookie";
 export type Listener = () => void;
 export type Unsubscriber = () => void;
 
-export type Storage<Value = any> = {
+export type Store<TItem = any> = {
   subscribe: (listener: Listener) => Unsubscriber;
-  getValue: () => Value;
-  getInitialValue: () => Value;
-  setValue: (value: Value) => void;
+  getItem: () => TItem;
+  getInitialItem: () => TItem;
+  setItem: (item: TItem) => void;
+  removeItem: () => void;
 };
 
-export interface StrategyOption {
-  strategy?: "cookie" | "localStorage" | "sessionStorage";
-}
-export interface BaseCookieStorageOption extends CookieSetOptions {}
-export interface CookieStorageOption
-  extends StrategyOption,
-    BaseCookieStorageOption {}
+export type BaseStoreOption = {
+  strategy: "cookie" | "localStorage" | "sessionStorage";
+};
+export type CookieStoreOption = { strategy: "cookie" } & CookieSetOptions;
+export type StorageStoreOption = {
+  strategy: "localStorage" | "sessionStorage";
+};
 
-export abstract class StorageClient<Value = unknown> {
-  protected abstract readonly storageCache: Map<
-    string,
-    Readonly<Storage<Value>>
-  >;
-  public abstract getOrCreateStorage<TStorageOption extends StrategyOption>(
+export abstract class BaseStoreClient<TItem = unknown> {
+  protected abstract readonly storeCache: Map<string, Readonly<Store<TItem>>>;
+  public abstract getOrCreateStore(
     key: string,
-    defaultValue: Value,
-    options?: TStorageOption
-  ): Readonly<Storage<Value>>;
+    defaultItem: TItem,
+    option: unknown
+  ): Readonly<Store<TItem>>;
 }

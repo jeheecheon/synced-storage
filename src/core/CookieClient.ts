@@ -1,48 +1,45 @@
 import {
-  type CookieStorageOption,
-  type Storage,
-  StorageClient,
+  type CookieStoreOption,
+  type Store,
+  BaseStoreClient,
 } from "@/types/client";
 import { safelyGet } from "@/utils/misc";
-import { CookieStorage } from "@/core";
+import { CookieStore } from "@/core";
 
-export class CookieClient extends StorageClient {
+export class CookieClient extends BaseStoreClient {
   private readonly initialCookies: CookieListItem[];
-  protected readonly storageCache: Map<string, Readonly<Storage>>;
+  protected readonly storeCache: Map<string, Readonly<Store>>;
 
-  constructor(initialCookies: CookieListItem[]) {
+  constructor(initialCookies?: CookieListItem[]) {
     super();
-    this.initialCookies = initialCookies;
-    this.storageCache = new Map();
+    this.initialCookies = initialCookies ?? [];
+    this.storeCache = new Map();
   }
 
-  public getOrCreateStorage<
-    TStorageOption extends CookieStorageOption,
-    TValue = unknown
-  >(
+  public getOrCreateStore<TItem = unknown>(
     key: string,
-    defaultValue: TValue,
-    options?: TStorageOption
-  ): Readonly<Storage<TValue>> {
-    const storage = this.storageCache.get(key);
-    if (storage) {
-      return storage;
+    defaultItem: TItem,
+    option?: CookieStoreOption
+  ): Readonly<Store<TItem>> {
+    const store = this.storeCache.get(key);
+    if (store) {
+      return store;
     }
 
     const cookie = this.initialCookies.find((cookie) => cookie.name === key);
-    const initialValue =
-      safelyGet<TValue>(() => JSON.parse(cookie?.value!)) ?? defaultValue;
+    const initialItem =
+      safelyGet<TItem>(() => JSON.parse(cookie?.value!)) ?? defaultItem;
 
-    const newStorage = new CookieStorage<TValue>(
+    const newStore = new CookieStore<TItem>(
       {
         name: key,
-        defaultValue,
-        initialValue,
+        defaultItem,
+        initialItem,
       },
-      options
+      option
     );
-    this.storageCache.set(key, newStorage);
+    this.storeCache.set(key, newStore);
 
-    return newStorage;
+    return newStore;
   }
 }
