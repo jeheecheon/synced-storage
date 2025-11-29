@@ -85,7 +85,9 @@ import { useStorageState } from "synced-storage/react";
 type Theme = "light" | "dark";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useStorageState<Theme>("theme", "light");
+  const [theme, setTheme] = useStorageState<Theme>("theme", "light", {
+    strategy: "localStorage", // "localStorage" | "sessionStorage"
+  });
 
   return (
     <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
