@@ -1,12 +1,23 @@
 {
   "name": "synced-storage",
   "version": "1.1.1",
-  "description": "",
-  "keywords": [],
+  "description": "A small, framework‑agnostic utility for syncing cookies, localStorage, and sessionStorage with application state.",
+  "keywords": [
+    "cookies",
+    "localStorage",
+    "sessionStorage",
+    "sync",
+    "react",
+    "next.js"
+  ],
   "author": "jeheecheon",
   "license": "MIT",
   "packageManager": "pnpm@10.18.3",
   "homepage": "https://github.com/jeheecheon/synced-storage#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeheecheon/synced-storage.git"
+  },
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
