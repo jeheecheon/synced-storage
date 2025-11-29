@@ -38,13 +38,11 @@ import { cookies } from "next/headers";
 import { SyncedStorageProvider } from "synced-storage/react";
 
 export default async function RootLayout({ children }) {
-  const initialCookies = await cookies();
-
   return (
     <html>
       <body>
         {/* `ssrCookies` is optional – only pass this in SSR env. */}
-        <SyncedStorageProvider ssrCookies={initialCookies.getAll()}>
+        <SyncedStorageProvider ssrCookies={(await cookies()).getAll()}>
           {children}
         </SyncedStorageProvider>
       </body>
@@ -56,17 +54,24 @@ export default async function RootLayout({ children }) {
 ### 2. Cookie state
 
 ```tsx
-"use client";
-
 import { useCookieState } from "synced-storage/react";
 
-export function DisplayName() {
-  const [name, setName] = useCookieState<string>("displayName", "Guest");
+export function PersonDetails() {
+  const [person, setPerson] = useCookieState("key-for-data", {
+    name: "Jehee Cheon",
+    age: 99,
+  });
 
   return (
     <div>
-      <p>Hello, {name}</p>
-      <button onClick={() => setName((n) => n + "!")}>Add excitement</button>
+      <p>
+        {person.name}, {person.age}
+      </p>
+      <button
+        onClick={() => setPerson((prev) => ({ ...prev, age: prev.age + 1 }))}
+      >
+        Increase age
+      </button>
     </div>
   );
 }
@@ -75,12 +80,12 @@ export function DisplayName() {
 ### 3. Local/session storage
 
 ```tsx
-"use client";
-
 import { useStorageState } from "synced-storage/react";
 
+type Theme = "light" | "dark";
+
 export function ThemeToggle() {
-  const [theme, setTheme] = useStorageState<string>("theme", "light");
+  const [theme, setTheme] = useStorageState<Theme>("theme", "light");
 
   return (
     <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
@@ -100,7 +105,7 @@ You can use the storage core directly — no React required.
 import { CookieClient } from "synced-storage/core";
 
 const cookieClient = new CookieClient();
-const store = cookieClient.getOrCreateStore<string>("theme", "light");
+const store = cookieClient.getOrCreateStore("theme", "light");
 
 store.subscribe(() => {
   const value = store.getItem();
