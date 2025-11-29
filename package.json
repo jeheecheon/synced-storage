@@ -1,11 +1,12 @@
 {
   "name": "synced-storage",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "",
   "keywords": [],
   "author": "jeheecheon",
   "license": "MIT",
   "packageManager": "pnpm@10.18.3",
+  "homepage": "https://github.com/jeheecheon/synced-storage#readme",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
