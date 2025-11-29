@@ -31,10 +31,9 @@ npm install synced-storage
 
 ## Quick start (React)
 
-### 1. Wrap your app (SSR cookie hydration)
+### 1. Wrap your app with SyncedStorageProvider
 
 ```tsx
-// app/layout.tsx (Next.js)
 import { cookies } from "next/headers";
 import { SyncedStorageProvider } from "synced-storage/react";
 
@@ -44,6 +43,7 @@ export default async function RootLayout({ children }) {
   return (
     <html>
       <body>
+        {/* `ssrCookies` is optional – only pass this in SSR env. */}
         <SyncedStorageProvider ssrCookies={initialCookies.getAll()}>
           {children}
         </SyncedStorageProvider>
@@ -61,7 +61,7 @@ export default async function RootLayout({ children }) {
 import { useCookieState } from "synced-storage/react";
 
 export function DisplayName() {
-  const [name, setName] = useCookieState("displayName", "Guest");
+  const [name, setName] = useCookieState<string>("displayName", "Guest");
 
   return (
     <div>
@@ -80,7 +80,7 @@ export function DisplayName() {
 import { useStorageState } from "synced-storage/react";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useStorageState("theme", "light");
+  const [theme, setTheme] = useStorageState<string>("theme", "light");
 
   return (
     <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
@@ -99,8 +99,8 @@ You can use the storage core directly — no React required.
 ```ts
 import { CookieClient } from "synced-storage/core";
 
-const cookies = new CookieClient(initialCookies);
-const store = cookies.getOrCreateStore("theme", "light");
+const cookieClient = new CookieClient();
+const store = cookieClient.getOrCreateStore<string>("theme", "light");
 
 store.subscribe(() => {
   const value = store.getItem();

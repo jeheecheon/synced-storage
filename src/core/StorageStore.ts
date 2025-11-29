@@ -21,7 +21,9 @@ export class StorageStore<TItem> implements Store<TItem> {
     this.strategy = args.strategy;
     this.expires = args.expires;
     this.isExpired = false;
+  }
 
+  public subscribe(listener: Listener): Unsubscriber {
     if (this.expires) {
       const leftTime = this.expires.getTime() - Date.now();
 
@@ -30,9 +32,7 @@ export class StorageStore<TItem> implements Store<TItem> {
         this.isExpired = true;
       }, leftTime);
     }
-  }
 
-  public subscribe(listener: Listener): Unsubscriber {
     const handler = (event: StorageEvent) => {
       if (event.key !== this.key) {
         return;
