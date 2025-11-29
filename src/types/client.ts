@@ -17,6 +17,7 @@ export type BaseStoreOption = {
 export type CookieStoreOption = { strategy: "cookie" } & CookieSetOptions;
 export type StorageStoreOption = {
   strategy: "localStorage" | "sessionStorage";
+  expires?: Date;
 };
 
 export abstract class BaseStoreClient<TItem = unknown> {

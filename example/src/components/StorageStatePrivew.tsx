@@ -10,7 +10,11 @@ type CountAndName = {
 const StorageStatePreview = () => {
   const [countAndName, setCountAndName] = useStorageState<CountAndName>(
     "countAndName",
-    { count: 0, name: "John" }
+    { count: 0, name: "John" },
+    {
+      strategy: "localStorage",
+      expires: new Date(Date.now() + 1000 * 3),
+    }
   );
 
   return (

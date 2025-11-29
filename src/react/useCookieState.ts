@@ -4,11 +4,11 @@ import {
   SetStateAction,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
-import { CookieClientContext } from "@/react";
-import { compareDeep, isFunction } from "@/utils/misc";
+import { SyncedStorageContext } from "@/react";
+import { isFunction } from "@/utils/misc";
 import { CookieStoreOption } from "@/types";
 
 function useCookieStore<TValue>(
@@ -16,15 +16,15 @@ function useCookieStore<TValue>(
   defaultValue: TValue,
   option?: CookieStoreOption
 ) {
-  const context = useContext(CookieClientContext);
+  const context = useContext(SyncedStorageContext);
 
   if (!context) {
     throw new Error(
-      "useCookieStorage must be used within a CookieClientProvider"
+      "useCookieState must be used within a SyncedStorageProvider"
     );
   }
 
-  return context.client.getOrCreateStore(key, defaultValue, option);
+  return context.cookieClient.getOrCreateStore(key, defaultValue, option);
 }
 
 export function useCookieState<TValue>(
@@ -37,23 +37,17 @@ export function useCookieState<TValue>(
   const [state, _setState] = useState(store.getInitialItem());
   const setState = useCallback(
     (action: SetStateAction<TValue>) => {
-      const nextState = isFunction(action) ? action(state) : action;
-      store.setItem(nextState);
-      _setState(nextState);
+      const next = isFunction(action) ? action(store.getItem()) : action;
+      store.setItem(next);
     },
-    [store, state]
+    [store]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     return store.subscribe(() => {
-      const newState = store.getItem();
-      if (compareDeep(newState, state)) {
-        return;
-      }
-
-      _setState(newState);
+      _setState(store.getItem());
     });
-  }, [store, state]);
+  }, []);
 
   return [state, setState] as const;
 }

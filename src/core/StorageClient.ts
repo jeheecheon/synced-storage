@@ -14,24 +14,25 @@ export class StorageClient extends BaseStoreClient {
   }
 
   public getOrCreateStore<TItem = unknown>(
-    _key: string,
+    key: string,
     defaultItem: TItem,
     option?: StorageStoreOption
   ): Readonly<Store<TItem>> {
     const strategy = option?.strategy ?? "localStorage";
-    const key = `${strategy}:${_key}`;
+    const storeKey = `${strategy}-${key}`;
 
-    const store = this.storeCache.get(key);
+    const store = this.storeCache.get(storeKey);
     if (store) {
       return store;
     }
 
     const newStore = new StorageStore<TItem>({
-      name: key,
+      key,
       defaultItem,
-      storage: strategy === "sessionStorage" ? sessionStorage : localStorage,
+      strategy,
+      expires: option?.expires,
     });
-    this.storeCache.set(key, newStore);
+    this.storeCache.set(storeKey, newStore);
 
     return newStore;
   }

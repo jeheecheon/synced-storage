@@ -1,43 +1,56 @@
 "use client";
 
-import { cache, SetStateAction, useCallback, useEffect, useState } from "react";
+import {
+  SetStateAction,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { StorageStoreOption } from "@/types/client";
-import { compareDeep, isFunction } from "@/utils/misc";
-import { StorageClient } from "@/core/StorageClient";
-import { useIsBrowser } from "./useIsBrowser";
+import { isFunction } from "@/utils/misc";
+import { SyncedStorageContext } from "./SyncedStoragePrivder";
 
-const getClient = cache(() => new StorageClient());
+function useStorageStore<TValue>(
+  key: string,
+  defaultValue: TValue,
+  option?: StorageStoreOption
+) {
+  const context = useContext(SyncedStorageContext);
+
+  if (!context) {
+    throw new Error(
+      "useStorageState must be used within a SyncedStorageProvider"
+    );
+  }
+
+  return context.storageClient.getOrCreateStore(key, defaultValue, option);
+}
 
 export function useStorageState<TValue>(
   key: string,
   defaultValue: TValue,
   option?: StorageStoreOption
 ) {
-  const isBrowser = useIsBrowser();
-  const store = isBrowser
-    ? getClient().getOrCreateStore(key, defaultValue, option)
-    : undefined;
+  const store = useStorageStore(key, defaultValue, option);
 
-  const [state, _setState] = useState(store?.getInitialItem() ?? defaultValue);
+  const [state, _setState] = useState(store.getInitialItem());
   const setState = useCallback(
     (action: SetStateAction<TValue>) => {
-      const nextState = isFunction(action) ? action(state) : action;
-      store?.setItem(nextState);
-      _setState(nextState);
+      const prev = store.getItem();
+      const next = isFunction(action) ? action(prev) : action;
+      store.setItem(next);
     },
-    [store, state]
+    [key]
   );
 
-  useEffect(() => {
-    return store?.subscribe(() => {
-      const newState = store.getItem();
-      if (compareDeep(newState, state)) {
-        return;
-      }
+  useLayoutEffect(() => {
+    _setState(store.getItem());
 
-      _setState(newState);
+    return store.subscribe(() => {
+      _setState(store.getItem());
     });
-  }, [store, state]);
+  }, []);
 
   return [state, setState] as const;
 }

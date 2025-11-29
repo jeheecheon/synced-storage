@@ -3,20 +3,38 @@ import { type Optional } from "@/types/misc";
 import { safelyGet } from "@/utils/misc";
 
 export class StorageStore<TItem> implements Store<TItem> {
-  private readonly name: string;
+  private readonly key: string;
   private readonly defaultItem: TItem;
-  private readonly storage: Storage;
+  private readonly strategy: "localStorage" | "sessionStorage";
+  private readonly expires?: Date;
+  private isExpired: boolean;
   private cachedItem: Optional<TItem>;
 
-  constructor(args: { name: string; defaultItem: TItem; storage: Storage }) {
-    this.name = args.name;
+  constructor(args: {
+    key: string;
+    defaultItem: TItem;
+    strategy: "localStorage" | "sessionStorage";
+    expires?: Date;
+  }) {
+    this.key = args.key;
     this.defaultItem = args.defaultItem;
-    this.storage = args.storage;
+    this.strategy = args.strategy;
+    this.expires = args.expires;
+    this.isExpired = false;
+
+    if (this.expires) {
+      const leftTime = this.expires.getTime() - Date.now();
+
+      setTimeout(() => {
+        this.setItem(this.defaultItem);
+        this.isExpired = true;
+      }, leftTime);
+    }
   }
 
   public subscribe(listener: Listener): Unsubscriber {
     const handler = (event: StorageEvent) => {
-      if (event.key !== this.name) {
+      if (event.key !== this.key) {
         return;
       }
 
@@ -25,15 +43,14 @@ export class StorageStore<TItem> implements Store<TItem> {
       listener();
     };
 
-    listener();
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
   }
 
   public getItem(): TItem {
     if (this.cachedItem === undefined) {
-      const raw = this.storage.getItem(this.name);
-      const deserialized = safelyGet<TItem>(() => JSON.parse(raw!));
+      const serialized = this.getStorage().getItem(this.key);
+      const deserialized = safelyGet<TItem>(() => JSON.parse(serialized!));
       this.cachedItem = deserialized;
     }
 
@@ -50,12 +67,35 @@ export class StorageStore<TItem> implements Store<TItem> {
       return;
     }
 
-    this.storage.setItem(this.name, serialized);
+    if (this.isExpired) {
+      console.warn(`${this.strategy} store "${this.key}" is expired`);
+      return;
+    }
+
+    const event = new StorageEvent("storage", {
+      key: this.key,
+      newValue: serialized,
+      oldValue: safelyGet(() => JSON.stringify(this.getItem())),
+    });
+
     this.cachedItem = item;
+    this.getStorage().setItem(this.key, serialized);
+    window.dispatchEvent(event);
   }
 
   public removeItem(): void {
-    this.storage.removeItem(this.name);
+    const event = new StorageEvent("storage", {
+      key: this.key,
+      newValue: undefined,
+      oldValue: safelyGet(() => JSON.stringify(this.getItem())),
+    });
+
     this.cachedItem = undefined;
+    this.getStorage().removeItem(this.key);
+    window.dispatchEvent(event);
+  }
+
+  private getStorage(): Storage {
+    return this.strategy === "localStorage" ? localStorage : sessionStorage;
   }
 }
