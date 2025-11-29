@@ -3,7 +3,7 @@ import type {
   Listener,
   Store,
   Unsubscriber,
-} from "@/types/client";
+} from "@/core/types";
 import { type Optional } from "@/types/misc";
 import { safelyGet } from "@/utils/misc";
 import Cookies, { type CookieChangeOptions } from "universal-cookie";

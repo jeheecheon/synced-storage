@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  SetStateAction,
+  type SetStateAction,
   useCallback,
   useContext,
   useLayoutEffect,
   useState,
 } from "react";
-import { StorageStoreOption } from "@/types/client";
+import { type StorageStoreOption } from "@/core/types";
 import { isFunction } from "@/utils/misc";
-import { SyncedStorageContext } from "./SyncedStoragePrivder";
+import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
 
 function useStorageStore<TValue>(
   key: string,

@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  SetStateAction,
+  type SetStateAction,
   useCallback,
   useContext,
   useLayoutEffect,
   useState,
 } from "react";
-import { SyncedStorageContext } from "@/react";
+import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
 import { isFunction } from "@/utils/misc";
-import { CookieStoreOption } from "@/types";
+import { type CookieStoreOption } from "@/core/types";
 
 function useCookieStore<TValue>(
   key: string,

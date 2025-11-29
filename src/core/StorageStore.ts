@@ -1,4 +1,4 @@
-import type { Listener, Store, Unsubscriber } from "@/types/client";
+import type { Listener, Store, Unsubscriber } from "@/core/types";
 import { type Optional } from "@/types/misc";
 import { safelyGet } from "@/utils/misc";
 

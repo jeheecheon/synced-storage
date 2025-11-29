@@ -2,9 +2,9 @@ import {
   type CookieStoreOption,
   type Store,
   BaseStoreClient,
-} from "@/types/client";
+} from "@/core/types";
 import { safelyGet } from "@/utils/misc";
-import { CookieStore } from "@/core";
+import { CookieStore } from "@/core/CookieStore";
 
 export class CookieClient extends BaseStoreClient {
   private readonly initialCookies: CookieListItem[];

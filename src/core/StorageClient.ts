@@ -1,9 +1,9 @@
 import {
   type Store,
   BaseStoreClient,
-  StorageStoreOption,
-} from "@/types/client";
-import { StorageStore } from "./StorageStore";
+  type StorageStoreOption,
+} from "@/core/types";
+import { StorageStore } from "@/core/StorageStore";
 
 export class StorageClient extends BaseStoreClient {
   protected readonly storeCache: Map<string, Readonly<Store>>;

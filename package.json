@@ -1,6 +1,6 @@
 {
   "name": "synced-storage",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "keywords": [],
   "author": "jeheecheon",
@@ -24,10 +24,6 @@
     "./react": {
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.js"
-    },
-    "./types": {
-      "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.js"
     }
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { CookieClient } from "@/core";
+import { CookieClient } from "@/core/CookieClient";
 import { StorageClient } from "@/core/StorageClient";
 import { type Nullable } from "@/types/misc";
 import { createContext, useMemo, type FC, type PropsWithChildren } from "react";
