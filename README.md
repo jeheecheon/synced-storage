@@ -1,39 +1,50 @@
 # Synced Storage
 
-Synced Storage keeps cookies, localStorage, and sessionStorage aligned with your UI. The core package is framework agnostic, while the React entry point simply wraps those primitives with familiar hooks.
+A small, framework‑agnostic utility for syncing **cookies**, **localStorage**, and **sessionStorage** with application state.  
+The core is fully portable — it isn’t tied to React — so adapters for **Svelte**, **SolidJS**, and **Vue** will be added soon.
 
-## Why Synced Storage
+---
 
-- Works anywhere – import `synced-storage/core` inside Node scripts, server components, or any framework.
-- Feels native in React – hooks mimic `useState`, so external storage reads/writes slot right into existing patterns.
-- Zero layout shift for cookies – hydrate with the same value rendered on the server, especially handy in Next.js.
+## What this package does
 
-## Install
+### ✔ One simple, unified API
+
+Use the same pattern to read, write, and sync values across cookies and browser storage.
+
+### ✔ Works in both server and client environments
+
+Cookie values can be hydrated on the server, and the browser side seamlessly continues from that state.
+
+### ✔ Portable core
+
+The core logic does not depend on React, making it easy to support any UI framework.
+
+---
+
+## Installation
 
 ```bash
-pnpm add synced-storage
-# or
 npm install synced-storage
 ```
 
-## Quick Start (React)
+---
 
-1. **Wrap the app once** – every hook requires the provider.
+## Quick start (React)
+
+### 1. Wrap your app (SSR cookie hydration)
 
 ```tsx
 // app/layout.tsx (Next.js)
 import { cookies } from "next/headers";
 import { SyncedStorageProvider } from "synced-storage/react";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }) {
+  const initialCookies = await cookies();
+
   return (
     <html>
       <body>
-        <SyncedStorageProvider ssrCookies={cookies().getAll()}>
+        <SyncedStorageProvider ssrCookies={initialCookies.getAll()}>
           {children}
         </SyncedStorageProvider>
       </body>
@@ -42,98 +53,68 @@ export default function RootLayout({
 }
 ```
 
-2. **Persist cookies with `useCookieState`** – server and client share the same initial value, so no flicker after hydration.
+### 2. Cookie state
 
 ```tsx
-// app/profile/DisplayName.tsx
 "use client";
 
 import { useCookieState } from "synced-storage/react";
 
 export function DisplayName() {
-  const [name, setName] = useCookieState("displayName", "Guest", {
-    strategy: "cookie",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-  });
+  const [name, setName] = useCookieState("displayName", "Guest");
 
   return (
-    <section>
-      <p>Hello, {name}!</p>
-      <button onClick={() => setName((prev) => `${prev}!`)}>
-        Add excitement
-      </button>
-    </section>
+    <div>
+      <p>Hello, {name}</p>
+      <button onClick={() => setName((n) => n + "!")}>Add excitement</button>
+    </div>
   );
 }
 ```
 
-3. **Use `useStorageState` for local/session storage** – same API, changes broadcast across tabs.
+### 3. Local/session storage
 
 ```tsx
-// app/settings/ThemeToggle.tsx
 "use client";
 
 import { useStorageState } from "synced-storage/react";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useStorageState("theme", "light", {
-    strategy: "localStorage",
-  });
-
-  const nextTheme = theme === "light" ? "dark" : "light";
+  const [theme, setTheme] = useStorageState("theme", "light");
 
   return (
-    <button onClick={() => setTheme(nextTheme)}>
-      Switch to {nextTheme} mode
+    <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+      Toggle theme
     </button>
   );
 }
 ```
 
-## API Cheat Sheet
+---
 
-### `SyncedStorageProvider`
+## Core usage (any framework)
 
-| Prop          | Description                                                                                                                        |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `ssrCookies?` | Pass `cookies().getAll()` (Next.js) or any `CookieListItem[]` captured on the server so cookie hooks match between SSR and client. |
-| `children`    | Render tree. Hooks throw if a provider isn’t present.                                                                              |
-
-### `useCookieState(key, defaultValue, option?)`
-
-| Field                        | Description                                                                                                                   |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `key: string`                | Cookie name used by the store.                                                                                                |
-| `defaultValue: TValue`       | Value returned when the cookie is missing; also drives the initial server render.                                             |
-| `option?: CookieStoreOption` | Cookie metadata (`path`, `domain`, `secure`, `maxAge`, etc.), mirroring `universal-cookie` plus the required `strategy` flag. |
-
-Returns the standard `[value, setValue]` tuple. Calling `setValue` writes to the cookie and updates every subscriber.
-
-### `useStorageState(key, defaultValue, option?)`
-
-| Field                         | Description                                                          |
-| ----------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `key: string`                 | Storage key persisted to `localStorage` or `sessionStorage`.         |
-| `defaultValue: TValue`        | Initial value when storage is empty; also used for the first render. |
-| `option?: StorageStoreOption` | Choose `strategy: "localStorage"                                     | "sessionStorage"`, and optionally set `expires: Date` to auto-reset back to the default when the timer elapses. |
-
-Returns `[value, setValue]`. Writes update the selected Web Storage bucket, emit the storage event, and stay synchronized across tabs.
-
-## Core Usage Without React
+You can use the storage core directly — no React required.
 
 ```ts
 import { CookieClient } from "synced-storage/core";
 
-const cookies = new CookieClient(initialCookiesFromServer);
-const themeStore = cookies.getOrCreateStore("theme", "light");
+const cookies = new CookieClient(initialCookies);
+const store = cookies.getOrCreateStore("theme", "light");
 
-themeStore.setItem("dark");
-const currentTheme = themeStore.getItem();
+store.setItem("dark");
+console.log(store.getItem());
 ```
 
-Each client exposes the same `Store` interface (`getItem`, `setItem`, `subscribe`, `removeItem`), so you can plug it into any environment.
+---
 
-## Example App
+## Example
 
-There is a ready-to-run Next.js demo under `example/` that wraps the provider, feeds SSR cookies, and shows the state staying in sync before and after hydration.
+A working Next.js example lives in the `example/` folder.  
+It demonstrates SSR cookies, client hydration, and synced web storage.
+
+---
+
+## License
+
+MIT
