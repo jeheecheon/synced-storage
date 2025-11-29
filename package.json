@@ -1,6 +1,6 @@
 {
   "name": "synced-storage",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "keywords": [],
   "author": "jeheecheon",
@@ -26,17 +26,23 @@
       "require": "./dist/react/index.js"
     }
   },
+  "sideEffects": false,
   "dependencies": {
-    "react": "^19.2.0",
     "universal-cookie": "^8.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
+    "react": "^19.2.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }
