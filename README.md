@@ -102,8 +102,12 @@ import { CookieClient } from "synced-storage/core";
 const cookies = new CookieClient(initialCookies);
 const store = cookies.getOrCreateStore("theme", "light");
 
+store.subscribe(() => {
+  const value = store.getItem();
+  console.log(`Changed to ${value}`);
+});
+
 store.setItem("dark");
-console.log(store.getItem());
 ```
 
 ---
