@@ -1,6 +1,6 @@
 {
   "name": "synced-storage",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "",
   "keywords": [],
   "author": "jeheecheon",
@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "publish": "pnpm build && pnpm publish --access public"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
