@@ -4,9 +4,11 @@ import StorageStatePreview from "@/components/StorageStatePrivew";
 
 const Home: FC = () => {
   return (
-    <main className="max-w-2xl mx-auto">
-      <CookieStatePreview />
-      <StorageStatePreview />
+    <main className="min-h-screen flex flex-col items-center justify-center">
+      <div className="space-y-12 border p-4">
+        <CookieStatePreview />
+        <StorageStatePreview />
+      </div>
     </main>
   );
 };
