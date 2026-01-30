@@ -37,10 +37,10 @@ export function useCookieState<TValue>(
   const [state, _setState] = useState(store.getInitialItem());
   const setState = useCallback(
     (action: SetStateAction<TValue>) => {
-      const next = isFunction(action) ? action(store.getItem()) : action;
+      const next = isFunction(action) ? action(state) : action;
       store.setItem(next);
     },
-    [store]
+    [store, state]
   );
 
   useLayoutEffect(() => {
