@@ -37,11 +37,10 @@ export function useStorageState<TValue>(
   const [state, _setState] = useState(store.getInitialItem());
   const setState = useCallback(
     (action: SetStateAction<TValue>) => {
-      const prev = store.getItem();
-      const next = isFunction(action) ? action(prev) : action;
+      const next = isFunction(action) ? action(state) : action;
       store.setItem(next);
     },
-    [key]
+    [store, state]
   );
 
   useLayoutEffect(() => {
