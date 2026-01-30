@@ -13,7 +13,7 @@ const StorageStatePreview = () => {
     { count: 0, name: "John" },
     {
       strategy: "localStorage",
-      expires: new Date(Date.now() + 1000 * 3),
+      expires: new Date(Date.now() + 1000 * 60),
     }
   );
 
@@ -21,7 +21,9 @@ const StorageStatePreview = () => {
     <div className="space-y-4">
       <h1>Storage State Preview</h1>
       <div>
-        <button onClick={handleIncrementCount}>Increment</button>
+        <button className="border p-1" onClick={handleIncrementCount}>
+          Increment
+        </button>
         <p>Count: {countAndName.count}</p>
         <p>Name: {countAndName.name}</p>
       </div>
