@@ -21,6 +21,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
+    "test": "vitest",
     "clean": "rm -rf dist",
     "package:publish": "pnpm build && pnpm publish --access public --no-git-checks"
   },
@@ -42,11 +43,15 @@
     "universal-cookie": "^8.0.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
+    "jsdom": "^28.0.0",
     "react": "^19.2.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "react": ">=16.8.0"
