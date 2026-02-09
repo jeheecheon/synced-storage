@@ -54,3 +54,8 @@ Reactive store pattern. Both store types implement `Store<TItem>` (`subscribe`, 
 - **tsup** — ESM + CJS, declarations, source maps, no minification
 - **TypeScript** — strict, ES2020, `@/*` → `src/*`
 - **Peer dep:** `react >=16.8.0` (optional)
+
+## Code Style
+
+- Early returns must use braces: `if (cond) { return; }` — never single-line `if (cond) return;`
+- Add a blank line after closing braces `}` before the next statement
