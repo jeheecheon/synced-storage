@@ -20,6 +20,23 @@ Battle-tested, framework-agnostic utility for syncing **cookies**, **localStorag
 npm install synced-storage
 ```
 
+## Core Usage (Any Framework)
+
+Use the storage core directly — no React required.
+
+```ts
+import { CookieClient } from "synced-storage/core";
+
+const client = new CookieClient();
+const store = client.getOrCreateStore("theme", "light");
+
+store.subscribe(() => {
+  console.log(`theme changed to ${store.getItem()}`);
+});
+
+store.setItem("dark");
+```
+
 ## Quick Start (React)
 
 ### 1. Wrap your app with SyncedStorageProvider
@@ -82,23 +99,6 @@ function ThemeToggle() {
     </button>
   );
 }
-```
-
-## Core Usage (Any Framework)
-
-Use the storage core directly — no React required.
-
-```ts
-import { CookieClient } from "synced-storage/core";
-
-const client = new CookieClient();
-const store = client.getOrCreateStore("theme", "light");
-
-store.subscribe(() => {
-  console.log(`theme changed to ${store.getItem()}`);
-});
-
-store.setItem("dark");
 ```
 
 ## Exports
