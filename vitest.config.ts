@@ -4,7 +4,8 @@ import path from "path";
 export default defineConfig({
   test: {
     environment: "jsdom",
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+    restoreMocks: true,
   },
   resolve: {
     alias: {
