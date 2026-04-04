@@ -17,7 +17,7 @@
       header {
         padding: 2rem;
         text-align: center;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid #1e1e1e;
       }
 
       header h1 {
@@ -31,23 +31,28 @@
         font-weight: 700;
       }
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 0;
-        min-height: calc(100vh - 81px);
-      }
-
-      /* ── Section base ── */
-      .section {
-        padding: 2.5rem 2rem;
-        border-right: 1px solid #333;
+      /* ── Sections stacked vertically ── */
+      .sections {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
       }
 
-      .section:last-child { border-right: none; }
+      .section {
+        padding: 2.5rem 2rem;
+        border-bottom: 1px solid #1e1e1e;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .section:last-child { border-bottom: none; }
+
+      /* ── Section header ── */
+      .section-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
 
       .section-tag {
         font-size: 0.65rem;
@@ -60,21 +65,66 @@
         width: fit-content;
       }
 
-      .section h2 {
+      .section-header h2 {
         font-size: 1.3rem;
         font-weight: 700;
         line-height: 1.2;
       }
 
-      .section p.desc {
+      .section-header p.desc {
         font-size: 0.8rem;
         color: #888;
         line-height: 1.6;
       }
 
+      /* ── Two-column body: code left, demo right ── */
+      .section-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+
+      /* ── Code panel ── */
+      .code-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        height: 100%;
+      }
+
+      .code-label {
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #555;
+        font-weight: 700;
+      }
+
+      .code-block {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        padding: 1rem;
+        font-size: 0.72rem;
+        line-height: 1.7;
+        overflow-x: auto;
+        color: #cbd5e1;
+        flex: 1;
+        white-space: pre;
+      }
+
+      /* ── Demo panel ── */
+      .demo-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      /* ── Value box ── */
       .value-box {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         padding: 1rem 1.25rem;
       }
@@ -94,6 +144,7 @@
         min-height: 2.5rem;
       }
 
+      /* ── Actions ── */
       .actions {
         display: flex;
         gap: 0.5rem;
@@ -115,27 +166,7 @@
       button:hover { opacity: 0.8; }
       button:active { opacity: 0.6; }
 
-      /* ── Cookie section — Amber ── */
-      #cookie .section-tag { background: #78350f; color: #fbbf24; }
-      #cookie { border-top: 3px solid #f59e0b; }
-      #cookie .value-display { color: #fbbf24; }
-      #cookie .btn-primary { background: #f59e0b; color: #0f0f0f; }
-      #cookie .btn-secondary { background: #292524; color: #d6d3d1; }
-
-      /* ── localStorage section — Indigo ── */
-      #local .section-tag { background: #1e1b4b; color: #818cf8; }
-      #local { border-top: 3px solid #6366f1; }
-      #local .value-display { color: #818cf8; }
-      #local .btn-primary { background: #6366f1; color: #fff; }
-      #local .btn-secondary { background: #1e1b4b; color: #c7d2fe; }
-
-      /* ── sessionStorage section — Emerald ── */
-      #session .section-tag { background: #064e3b; color: #34d399; }
-      #session { border-top: 3px solid #10b981; }
-      #session .value-display { color: #34d399; }
-      #session .btn-primary { background: #10b981; color: #0f0f0f; }
-      #session .btn-secondary { background: #064e3b; color: #a7f3d0; }
-
+      /* ── Input row ── */
       .input-row {
         display: flex;
         gap: 0.5rem;
@@ -145,8 +176,8 @@
         flex: 1;
         font-family: inherit;
         font-size: 0.85rem;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 5px;
         padding: 0.5rem 0.75rem;
         color: #f0f0f0;
@@ -154,12 +185,13 @@
       }
 
       .input-row input:focus {
-        border-color: rgba(255,255,255,0.35);
+        border-color: rgba(255, 255, 255, 0.35);
       }
 
+      /* ── Timer bar ── */
       .timer-bar-wrap {
         height: 4px;
-        background: rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.08);
         border-radius: 2px;
         overflow: hidden;
       }
@@ -172,9 +204,42 @@
         border-radius: 2px;
       }
 
+      /* ── Meta text ── */
       .meta {
         font-size: 0.72rem;
         color: #666;
+      }
+
+      /* ── Cookie section — Amber ── */
+      #cookie { border-left: 3px solid #f59e0b; }
+      #cookie .section-tag { background: #78350f; color: #fbbf24; }
+      #cookie .value-display { color: #fbbf24; }
+      #cookie .btn-primary { background: #f59e0b; color: #0f0f0f; }
+      #cookie .btn-secondary { background: #292524; color: #d6d3d1; }
+
+      /* ── localStorage section — Indigo ── */
+      #local { border-left: 3px solid #6366f1; }
+      #local .section-tag { background: #1e1b4b; color: #818cf8; }
+      #local .value-display { color: #818cf8; }
+      #local .btn-primary { background: #6366f1; color: #fff; }
+      #local .btn-secondary { background: #1e1b4b; color: #c7d2fe; }
+
+      /* ── sessionStorage section — Emerald ── */
+      #session { border-left: 3px solid #10b981; }
+      #session .section-tag { background: #064e3b; color: #34d399; }
+      #session .value-display { color: #34d399; }
+      #session .btn-primary { background: #10b981; color: #0f0f0f; }
+      #session .btn-secondary { background: #064e3b; color: #a7f3d0; }
+
+      /* ── Mobile: stack panels vertically ── */
+      @media (max-width: 767px) {
+        .section-body {
+          grid-template-columns: 1fr;
+        }
+
+        .section {
+          padding: 2rem 1.25rem;
+        }
       }
     </style>
   </head>
@@ -183,87 +248,155 @@
       <h1><span>synced-storage</span> / core demo &mdash; plain JS</h1>
     </header>
 
-    <main class="grid">
+    <main class="sections">
+
       <!-- ── Cookie ── -->
       <section class="section" id="cookie">
-        <span class="section-tag">Cookie</span>
-        <div>
+        <div class="section-header">
+          <span class="section-tag">Cookie</span>
           <h2>Cookie Store</h2>
-          <p class="desc" style="margin-top:.5rem">
+          <p class="desc">
             Persists across sessions. Syncs via cookie.<br>
             Open a new tab — the counter carries over.
           </p>
         </div>
 
-        <div class="value-box">
-          <div class="value-label">Current value</div>
-          <div class="value-display" id="cookie-value">0</div>
-        </div>
+        <div class="section-body">
+          <div class="code-panel">
+            <div class="code-label">Usage</div>
+            <pre class="code-block"><code>import { CookieClient } from "synced-storage/core";
 
-        <div class="actions">
-          <button class="btn-primary" id="cookie-inc">+ Increment</button>
-          <button class="btn-secondary" id="cookie-dec">− Decrement</button>
-          <button class="btn-secondary" id="cookie-reset">Reset</button>
-        </div>
+const client = new CookieClient();
+const store = client.getOrCreateStore("counter", 0);
 
-        <p class="meta" id="cookie-meta">Subscribed. Waiting for changes…</p>
+store.subscribe(value => {
+  console.log("counter →", value);
+});
+
+// Functional update — always gets latest value
+store.setItem(prev => prev + 1);
+store.setItem(0); // reset</code></pre>
+          </div>
+
+          <div class="demo-panel">
+            <div class="value-box">
+              <div class="value-label">Current value</div>
+              <div class="value-display" id="cookie-value">0</div>
+            </div>
+
+            <div class="actions">
+              <button class="btn-primary" id="cookie-inc">+ Increment</button>
+              <button class="btn-secondary" id="cookie-dec">− Decrement</button>
+              <button class="btn-secondary" id="cookie-reset">Reset</button>
+            </div>
+
+            <p class="meta" id="cookie-meta">Subscribed. Waiting for changes…</p>
+          </div>
+        </div>
       </section>
 
       <!-- ── localStorage ── -->
       <section class="section" id="local">
-        <span class="section-tag">localStorage</span>
-        <div>
+        <div class="section-header">
+          <span class="section-tag">localStorage</span>
           <h2>localStorage Store</h2>
-          <p class="desc" style="margin-top:.5rem">
+          <p class="desc">
             Persists until cleared. Cross-tab sync via<br>
             native <code>StorageEvent</code>. Type a message.
           </p>
         </div>
 
-        <div class="value-box">
-          <div class="value-label">Stored message</div>
-          <div class="value-display" id="local-value" style="font-size:1.1rem;padding-top:.4rem">—</div>
-        </div>
+        <div class="section-body">
+          <div class="code-panel">
+            <div class="code-label">Usage</div>
+            <pre class="code-block"><code>import { StorageClient } from "synced-storage/core";
 
-        <div class="input-row">
-          <input id="local-input" type="text" placeholder="Type something…" maxlength="60" />
-          <button class="btn-primary" id="local-save">Save</button>
-        </div>
+const client = new StorageClient();
+const store = client.getOrCreateStore(
+  "message", "",
+  { strategy: "localStorage" }
+);
 
-        <div class="actions">
-          <button class="btn-secondary" id="local-clear">Clear</button>
-        </div>
+store.subscribe(value => {
+  console.log("message →", value);
+});
 
-        <p class="meta" id="local-meta">Subscribed. Waiting for changes…</p>
+store.setItem("hello world");
+store.removeItem();</code></pre>
+          </div>
+
+          <div class="demo-panel">
+            <div class="value-box">
+              <div class="value-label">Stored message</div>
+              <div class="value-display" id="local-value" style="font-size:1.1rem;padding-top:.4rem">—</div>
+            </div>
+
+            <div class="input-row">
+              <input id="local-input" type="text" placeholder="Type something…" maxlength="60" />
+              <button class="btn-primary" id="local-save">Save</button>
+            </div>
+
+            <div class="actions">
+              <button class="btn-secondary" id="local-clear">Clear</button>
+            </div>
+
+            <p class="meta" id="local-meta">Subscribed. Waiting for changes…</p>
+          </div>
+        </div>
       </section>
 
       <!-- ── sessionStorage ── -->
       <section class="section" id="session">
-        <span class="section-tag">sessionStorage + Expiry</span>
-        <div>
+        <div class="section-header">
+          <span class="section-tag">sessionStorage + Expiry</span>
           <h2>sessionStorage Store</h2>
-          <p class="desc" style="margin-top:.5rem">
+          <p class="desc">
             Cleared when the tab closes. This store<br>
             expires automatically after <strong>15 seconds</strong>.
           </p>
         </div>
 
-        <div class="value-box">
-          <div class="value-label">Current value</div>
-          <div class="value-display" id="session-value" style="font-size:1rem;padding-top:.3rem">—</div>
-        </div>
+        <div class="section-body">
+          <div class="code-panel">
+            <div class="code-label">Usage</div>
+            <pre class="code-block"><code>import { StorageClient } from "synced-storage/core";
 
-        <div class="timer-bar-wrap">
-          <div id="timer-bar"></div>
-        </div>
+const client = new StorageClient();
+const store = client.getOrCreateStore(
+  "session", "",
+  { strategy: "sessionStorage" }
+);
 
-        <div class="actions">
-          <button class="btn-primary" id="session-set">Set with 15s expiry</button>
-          <button class="btn-secondary" id="session-reset">Reset</button>
-        </div>
+store.subscribe(value => {
+  console.log("session →", value);
+});
 
-        <p class="meta" id="session-meta">Subscribed. Waiting for changes…</p>
+store.setItem(`Set at ${new Date().toLocaleTimeString()}`);
+
+// Manual expiry: remove after 15 seconds
+setTimeout(() => store.removeItem(), 15_000);</code></pre>
+          </div>
+
+          <div class="demo-panel">
+            <div class="value-box">
+              <div class="value-label">Current value</div>
+              <div class="value-display" id="session-value" style="font-size:1rem;padding-top:.3rem">—</div>
+            </div>
+
+            <div class="timer-bar-wrap">
+              <div id="timer-bar"></div>
+            </div>
+
+            <div class="actions">
+              <button class="btn-primary" id="session-set">Set with 15s expiry</button>
+              <button class="btn-secondary" id="session-reset">Reset</button>
+            </div>
+
+            <p class="meta" id="session-meta">Subscribed. Waiting for changes…</p>
+          </div>
+        </div>
       </section>
+
     </main>
 
     <script type="module" src="/src/main.ts"></script>
