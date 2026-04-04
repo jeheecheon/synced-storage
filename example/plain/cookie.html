@@ -4,73 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>synced-storage — Cookie</title>
-    <style>
-      body {
-        font-family: monospace;
-        background: #111;
-        color: #eee;
-        margin: 0;
-        padding: 2rem;
-      }
-      a {
-        font-size: 0.75rem;
-        color: #666;
-        text-decoration: none;
-      }
-      a:hover {
-        color: #aaa;
-      }
-      .card {
-        border: 1px solid #333;
-        border-radius: 6px;
-        padding: 1.25rem;
-        width: 220px;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-top: 1.5rem;
-      }
-      .label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #666;
-      }
-      .value {
-        font-size: 1.6rem;
-        font-weight: bold;
-        color: #fbbf24;
-        min-height: 2rem;
-      }
-      .actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-      }
-      button {
-        font-family: monospace;
-        font-size: 0.75rem;
-        padding: 0.3rem 0.7rem;
-        border: 1px solid #444;
-        background: #1e1e1e;
-        color: #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #2a2a2a;
-      }
-    </style>
   </head>
-  <body>
-    <a href="./index.html">← back</a>
-    <div class="card">
-      <div class="label">Cookie</div>
-      <div class="value" id="cookie-val">0</div>
-      <div class="actions">
-        <button id="c-inc">+1</button>
-        <button id="c-dec">-1</button>
-        <button id="c-reset">reset</button>
+  <body style="font-family:monospace;background:#111;color:#eee;margin:0;padding:2rem;">
+    <div style="border:1px solid #333;border-radius:6px;padding:1.25rem;width:220px;display:flex;flex-direction:column;gap:0.75rem;">
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:#666;">Cookie</div>
+      <div id="cookie-val" style="font-size:1.6rem;font-weight:bold;color:#fbbf24;min-height:2rem;">0</div>
+      <div style="display:flex;gap:0.5rem;">
+        <button id="c-inc" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">+1</button>
+        <button id="c-dec" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">-1</button>
+        <button id="c-reset" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">reset</button>
       </div>
     </div>
 
