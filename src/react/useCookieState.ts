@@ -1,14 +1,12 @@
 "use client";
 
 import {
-  type SetStateAction,
   useCallback,
   useContext,
   useLayoutEffect,
   useState,
 } from "react";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
-import { isFunction } from "@/utils/misc";
 import { type CookieStoreOption } from "@/core/types";
 
 function useCookieStore<TValue>(
@@ -36,11 +34,10 @@ export function useCookieState<TValue>(
 
   const [state, _setState] = useState(store.getInitialItem());
   const setState = useCallback(
-    (action: SetStateAction<TValue>) => {
-      const next = isFunction(action) ? action(state) : action;
-      store.setItem(next);
+    (action: TValue | ((prev: TValue) => TValue)) => {
+      store.setItem(action);
     },
-    [store, state]
+    [store]
   );
 
   useLayoutEffect(() => {

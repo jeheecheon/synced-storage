@@ -1,6 +1,6 @@
 import type { Listener, Store, Unsubscriber } from "@/core/types";
 import { type Optional } from "@/types/misc";
-import { safelyGet } from "@/utils/misc";
+import { isFunction, safelyGet } from "@/utils/misc";
 
 export class StorageStore<TItem> implements Store<TItem> {
   private readonly key: string;
@@ -61,8 +61,10 @@ export class StorageStore<TItem> implements Store<TItem> {
     return this.defaultItem;
   }
 
-  public setItem(item: TItem): void {
-    const serialized = safelyGet(() => JSON.stringify(item));
+  public setItem(item: TItem | ((prev: TItem) => TItem)): void {
+    const next = isFunction(item) ? item(this.getItem()) : item;
+    const serialized = safelyGet(() => JSON.stringify(next));
+
     if (!serialized) {
       return;
     }
@@ -78,7 +80,7 @@ export class StorageStore<TItem> implements Store<TItem> {
       oldValue: safelyGet(() => JSON.stringify(this.getItem())),
     });
 
-    this.cachedItem = item;
+    this.cachedItem = next;
     this.getStorage().setItem(this.key, serialized);
     window.dispatchEvent(event);
   }

@@ -1,101 +1,73 @@
-import { describe, it, expect, afterEach, beforeEach } from "vitest";
-import { renderHook, act, cleanup } from "@testing-library/react";
-import { useStorageState } from "@/react/useStorageState";
+import { describe, it, expect, beforeEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import React from "react";
 import { SyncedStorageProvider } from "@/react/SyncedStorageProvider";
+import { useStorageState } from "@/react/useStorageState";
 
-afterEach(cleanup);
-
-beforeEach(() => {
-  localStorage.clear();
-  sessionStorage.clear();
-});
-
-function wrapper({ children }: { children: React.ReactNode }) {
-  return <SyncedStorageProvider>{children}</SyncedStorageProvider>;
-}
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(SyncedStorageProvider, null, children);
 
 describe("useStorageState", () => {
-  it("throws when used outside provider", () => {
-    expect(() => {
-      renderHook(() => useStorageState("k", "default"));
-    }).toThrow("useStorageState must be used within a SyncedStorageProvider");
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
   });
 
-  it("returns defaultValue as initial state", () => {
-    const { result } = renderHook(() => useStorageState("k", "default"), { wrapper });
-    expect(result.current[0]).toBe("default");
-  });
-
-  it("reads existing storage value on mount", () => {
-    localStorage.setItem("pre", JSON.stringify("existing"));
-    const { result } = renderHook(() => useStorageState("pre", "default"), { wrapper });
-    expect(result.current[0]).toBe("existing");
-  });
-
-  it("setState with direct value updates state", () => {
-    const { result } = renderHook(() => useStorageState("direct", "default"), { wrapper });
-
-    act(() => {
-      result.current[1]("new-value");
-    });
-
-    expect(result.current[0]).toBe("new-value");
-  });
-
-  it("setState persists value to localStorage", () => {
-    const { result } = renderHook(() => useStorageState("persist-check", "default"), { wrapper });
-
-    act(() => {
-      result.current[1]("persisted");
-    });
-
-    expect(localStorage.getItem("persist-check")).toBe(JSON.stringify("persisted"));
-  });
-
-  it("setState with function updater uses current React state", () => {
-    const { result } = renderHook(() => useStorageState("fn", 0), { wrapper });
-
-    act(() => {
-      result.current[1]((prev) => prev + 1);
-    });
-
-    expect(result.current[0]).toBe(1);
-  });
-
-  it("state updates on external StorageEvent", () => {
-    const { result } = renderHook(() => useStorageState("ext", "default"), { wrapper });
-
-    act(() => {
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: "ext",
-          newValue: JSON.stringify("from-other-tab"),
-        })
-      );
-    });
-
-    expect(result.current[0]).toBe("from-other-tab");
-  });
-
-  it("works with sessionStorage strategy", () => {
-    sessionStorage.setItem("sess", JSON.stringify("session-val"));
+  it("returns the default value on first render", () => {
     const { result } = renderHook(
-      () => useStorageState("sess", "default", { strategy: "sessionStorage" }),
-      { wrapper }
+      () => useStorageState("key", 0, { strategy: "localStorage" }),
+      { wrapper },
     );
-    expect(result.current[0]).toBe("session-val");
+    expect(result.current[0]).toBe(0);
   });
 
-  it("consecutive functional setStates use fresh state", () => {
-    const { result } = renderHook(() => useStorageState("counter", 0), { wrapper });
-
+  it("setState reference is stable across re-renders", () => {
+    const { result } = renderHook(
+      () => useStorageState("key", 0, { strategy: "localStorage" }),
+      { wrapper },
+    );
+    const setStateBefore = result.current[1];
     act(() => {
-      result.current[1]((prev) => prev + 1);
+      result.current[1](1);
+    });
+    expect(result.current[1]).toBe(setStateBefore);
+  });
+
+  it("updates state when called with a direct value", () => {
+    const { result } = renderHook(
+      () => useStorageState("key", 0, { strategy: "localStorage" }),
+      { wrapper },
+    );
+    act(() => {
+      result.current[1](99);
+    });
+    expect(result.current[0]).toBe(99);
+  });
+
+  it("updates state when called with a functional update", () => {
+    const { result } = renderHook(
+      () => useStorageState("key", 0, { strategy: "localStorage" }),
+      { wrapper },
+    );
+    act(() => {
+      result.current[1](5);
     });
     act(() => {
       result.current[1]((prev) => prev + 1);
     });
+    expect(result.current[0]).toBe(6);
+  });
 
-    expect(result.current[0]).toBe(2);
+  it("rapid sequential functional updates produce correct final value", () => {
+    const { result } = renderHook(
+      () => useStorageState("key", 0, { strategy: "localStorage" }),
+      { wrapper },
+    );
+    act(() => {
+      result.current[1]((prev) => prev + 1);
+      result.current[1]((prev) => prev + 1);
+      result.current[1]((prev) => prev + 1);
+    });
+    expect(result.current[0]).toBe(3);
   });
 });

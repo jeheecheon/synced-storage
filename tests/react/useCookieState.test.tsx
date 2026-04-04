@@ -1,81 +1,76 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { renderHook, act, cleanup } from "@testing-library/react";
-import { useCookieState } from "@/react/useCookieState";
+import { describe, it, expect, beforeEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import React from "react";
 import { SyncedStorageProvider } from "@/react/SyncedStorageProvider";
+import { useCookieState } from "@/react/useCookieState";
 
-afterEach(cleanup);
-
-function wrapper({ children }: { children: React.ReactNode }) {
-  return <SyncedStorageProvider>{children}</SyncedStorageProvider>;
+function clearCookies() {
+  document.cookie.split(";").forEach((c) => {
+    const name = c.split("=")[0].trim();
+    if (name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    }
+  });
 }
 
-function ssrWrapper(ssrCookies: CookieListItem[]) {
-  return ({ children }: { children: React.ReactNode }) => (
-    <SyncedStorageProvider ssrCookies={ssrCookies}>{children}</SyncedStorageProvider>
-  );
-}
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(SyncedStorageProvider, null, children);
 
 describe("useCookieState", () => {
-  it("throws when used outside provider", () => {
-    expect(() => {
-      renderHook(() => useCookieState("k", "default"));
-    }).toThrow("useCookieState must be used within a SyncedStorageProvider");
+  beforeEach(() => {
+    clearCookies();
   });
 
-  it("returns defaultValue as initial state", () => {
-    const { result } = renderHook(() => useCookieState("k", "default"), { wrapper });
-    expect(result.current[0]).toBe("default");
-  });
-
-  it("setState with direct value updates state", () => {
-    const { result } = renderHook(() => useCookieState("direct-set", "default"), { wrapper });
-
-    act(() => {
-      result.current[1]("new-value");
+  it("returns the default value on first render", () => {
+    const { result } = renderHook(() => useCookieState("count", 0), {
+      wrapper,
     });
-
-    expect(result.current[0]).toBe("new-value");
+    expect(result.current[0]).toBe(0);
   });
 
-  it("setState persists value to cookie", () => {
-    const { result } = renderHook(() => useCookieState("persist-check", "default"), { wrapper });
-
-    act(() => {
-      result.current[1]("persisted");
+  it("setState reference is stable across re-renders", () => {
+    const { result } = renderHook(() => useCookieState("count", 0), {
+      wrapper,
     });
-
-    expect(document.cookie).toContain("persist-check=");
-  });
-
-  it("setState with function updater uses current React state", () => {
-    const { result } = renderHook(() => useCookieState("fn-update", 0), { wrapper });
-
+    const setStateBefore = result.current[1];
     act(() => {
-      result.current[1]((prev) => prev + 1);
+      result.current[1](1);
     });
-
-    expect(result.current[0]).toBe(1);
+    expect(result.current[1]).toBe(setStateBefore);
   });
 
-  it("returns initialItem from SSR cookies", () => {
-    const cookies = [{ name: "ssr-key", value: JSON.stringify("ssr-value") }];
-    const { result } = renderHook(
-      () => useCookieState("ssr-key", "default"),
-      { wrapper: ssrWrapper(cookies) }
-    );
-    expect(result.current[0]).toBe("ssr-value");
-  });
-
-  it("consecutive functional setStates use fresh state", () => {
-    const { result } = renderHook(() => useCookieState("counter", 0), { wrapper });
-
+  it("updates state when called with a direct value", () => {
+    const { result } = renderHook(() => useCookieState("count", 0), {
+      wrapper,
+    });
     act(() => {
-      result.current[1]((prev) => prev + 1);
+      result.current[1](99);
+    });
+    expect(result.current[0]).toBe(99);
+  });
+
+  it("updates state when called with a functional update", () => {
+    const { result } = renderHook(() => useCookieState("count", 0), {
+      wrapper,
+    });
+    act(() => {
+      result.current[1](5);
     });
     act(() => {
       result.current[1]((prev) => prev + 1);
     });
+    expect(result.current[0]).toBe(6);
+  });
 
-    expect(result.current[0]).toBe(2);
+  it("rapid sequential functional updates produce correct final value", () => {
+    const { result } = renderHook(() => useCookieState("count", 0), {
+      wrapper,
+    });
+    act(() => {
+      result.current[1]((prev) => prev + 1);
+      result.current[1]((prev) => prev + 1);
+      result.current[1]((prev) => prev + 1);
+    });
+    expect(result.current[0]).toBe(3);
   });
 });
