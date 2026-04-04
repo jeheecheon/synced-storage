@@ -8,11 +8,11 @@
   <body style="font-family:monospace;background:#111;color:#eee;margin:0;padding:2rem;">
     <div style="border:1px solid #333;border-radius:6px;padding:1.25rem;width:220px;display:flex;flex-direction:column;gap:0.75rem;">
       <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:#666;">localStorage</div>
-      <div id="local-val" style="font-size:1rem;font-weight:bold;color:#818cf8;min-height:2rem;word-break:break-all;">—</div>
-      <input id="local-input" placeholder="type and save…" style="font-family:monospace;font-size:0.8rem;background:#1a1a1a;border:1px solid #444;color:#eee;border-radius:4px;padding:0.3rem 0.5rem;width:100%;box-sizing:border-box;" />
+      <div id="val" style="font-size:1.6rem;font-weight:bold;color:#818cf8;min-height:2rem;">0</div>
       <div style="display:flex;gap:0.5rem;">
-        <button id="l-save" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">save</button>
-        <button id="l-clear" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">clear</button>
+        <button id="inc" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">+1</button>
+        <button id="dec" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">-1</button>
+        <button id="reset" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">reset</button>
       </div>
     </div>
 
@@ -20,24 +20,16 @@
       import { StorageClient } from "https://esm.sh/synced-storage@1.2.0/core";
 
       const client = new StorageClient();
-      const store = client.getOrCreateStore("demo-message", "", { strategy: "localStorage" });
-      const val = document.getElementById("local-val");
-      const input = document.getElementById("local-input");
+      const store = client.getOrCreateStore("demo-ls-counter", 0, { strategy: "localStorage" });
+      const val = document.getElementById("val");
 
       store.subscribe((v) => {
-        val.textContent = v || "—";
+        val.textContent = v;
       });
 
-      document.getElementById("l-save").onclick = () => {
-        if (input.value) {
-          store.setItem(input.value);
-        }
-      };
-
-      document.getElementById("l-clear").onclick = () => {
-        store.removeItem();
-        input.value = "";
-      };
+      document.getElementById("inc").onclick = () => store.setItem(store.getItem() + 1);
+      document.getElementById("dec").onclick = () => store.setItem(store.getItem() - 1);
+      document.getElementById("reset").onclick = () => store.setItem(0);
     </script>
   </body>
 </html>

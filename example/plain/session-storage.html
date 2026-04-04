@@ -8,13 +8,14 @@
   <body style="font-family:monospace;background:#111;color:#eee;margin:0;padding:2rem;">
     <div style="border:1px solid #333;border-radius:6px;padding:1.25rem;width:220px;display:flex;flex-direction:column;gap:0.75rem;">
       <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:#666;">sessionStorage (15s expiry)</div>
-      <div id="session-val" style="font-size:1rem;font-weight:bold;color:#34d399;min-height:2rem;">—</div>
+      <div id="val" style="font-size:1.6rem;font-weight:bold;color:#34d399;min-height:2rem;">0</div>
       <div style="height:3px;background:#222;border-radius:2px;overflow:hidden;">
         <div id="bar" style="height:100%;background:#10b981;width:0%;transition:width 0.3s linear;"></div>
       </div>
       <div style="display:flex;gap:0.5rem;">
-        <button id="s-set" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">set + 15s expiry</button>
-        <button id="s-reset" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">reset</button>
+        <button id="inc" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">+1</button>
+        <button id="dec" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">-1</button>
+        <button id="reset" style="font-family:monospace;font-size:0.75rem;padding:0.3rem 0.7rem;border:1px solid #444;background:#1e1e1e;color:#ccc;border-radius:4px;cursor:pointer;">reset</button>
       </div>
     </div>
 
@@ -22,35 +23,37 @@
       import { StorageClient } from "https://esm.sh/synced-storage@1.2.0/core";
 
       const client = new StorageClient();
-      const val = document.getElementById("session-val");
+      const val = document.getElementById("val");
       const bar = document.getElementById("bar");
 
+      let count = 0;
       let store = null;
       let barTimer = null;
 
-      function initStore(expires) {
+      function setCount(next) {
+        count = next;
+
         if (store) {
           store.removeItem();
         }
 
-        store = client.getOrCreateStore("demo-session-" + Date.now(), "active!", {
+        const expires = new Date(Date.now() + 15000);
+
+        store = client.getOrCreateStore("demo-ss-" + Date.now(), count, {
           strategy: "sessionStorage",
           expires,
         });
 
         store.subscribe((v) => {
-          val.textContent = v || "—";
-
-          if (!v) {
+          if (v === null || v === undefined) {
+            count = 0;
+            val.textContent = 0;
             bar.style.width = "0%";
+            clearInterval(barTimer);
           }
         });
-      }
 
-      document.getElementById("s-set").onclick = () => {
-        const expires = new Date(Date.now() + 15000);
-
-        initStore(expires);
+        val.textContent = count;
 
         if (barTimer) {
           clearInterval(barTimer);
@@ -69,9 +72,11 @@
 
           bar.style.width = (left / 15000) * 100 + "%";
         }, 100);
-      };
+      }
 
-      document.getElementById("s-reset").onclick = () => {
+      document.getElementById("inc").onclick = () => setCount(count + 1);
+      document.getElementById("dec").onclick = () => setCount(count - 1);
+      document.getElementById("reset").onclick = () => {
         if (store) {
           store.removeItem();
         }
@@ -80,6 +85,9 @@
           clearInterval(barTimer);
         }
 
+        count = 0;
+        store = null;
+        val.textContent = 0;
         bar.style.width = "0%";
       };
     </script>
