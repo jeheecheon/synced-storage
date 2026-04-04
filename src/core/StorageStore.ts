@@ -1,6 +1,6 @@
 import type { Listener, Store, Unsubscriber } from "@/core/types";
 import { type Optional } from "@/types/misc";
-import { isFunction, safelyGet } from "@/utils/misc";
+import { isBrowser, isFunction, safelyGet } from "@/utils/misc";
 
 export class StorageStore<TItem> implements Store<TItem> {
   private readonly key: string;
@@ -21,10 +21,8 @@ export class StorageStore<TItem> implements Store<TItem> {
     this.strategy = args.strategy;
     this.expires = args.expires;
     this.isExpired = false;
-  }
 
-  public subscribe(listener: Listener): Unsubscriber {
-    if (this.expires) {
+    if (this.expires && isBrowser()) {
       const leftTime = this.expires.getTime() - Date.now();
 
       setTimeout(() => {
@@ -32,7 +30,9 @@ export class StorageStore<TItem> implements Store<TItem> {
         this.isExpired = true;
       }, leftTime);
     }
+  }
 
+  public subscribe(listener: Listener<TItem>): Unsubscriber {
     const handler = (event: StorageEvent) => {
       if (event.key !== this.key) {
         return;
@@ -40,7 +40,7 @@ export class StorageStore<TItem> implements Store<TItem> {
 
       const deserialized = safelyGet<TItem>(() => JSON.parse(event.newValue!));
       this.cachedItem = deserialized ?? this.defaultItem;
-      listener();
+      listener(this.cachedItem);
     };
 
     window.addEventListener("storage", handler);
