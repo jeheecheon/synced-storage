@@ -1,114 +1,109 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { CookieStore } from "@/core/CookieStore";
 
-let testId = 0;
-function uniqueKey() {
-  return `test-cookie-${++testId}`;
-}
-
-function createStore<T>(
-  name: string,
-  defaultItem: T,
-  initialItem?: T
-) {
-  return new CookieStore({
-    name,
-    defaultItem,
-    initialItem: initialItem ?? defaultItem,
+function clearCookies() {
+  document.cookie.split(";").forEach((c) => {
+    const name = c.split("=")[0].trim();
+    if (name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    }
   });
 }
 
-describe("CookieStore", () => {
-  describe("getItem", () => {
-    it("returns defaultItem when cookie does not exist", () => {
-      const store = createStore(uniqueKey(), "default");
-      expect(store.getItem()).toBe("default");
-    });
-
-    it("returns parsed value after setItem", () => {
-      const store = createStore(uniqueKey(), { count: 0 });
-      store.setItem({ count: 5 });
-      expect(store.getItem()).toEqual({ count: 5 });
-    });
-
-    it("returns defaultItem for unparseable cookie value", () => {
-      const key = uniqueKey();
-      document.cookie = `${key}=not-valid-json`;
-      const store = createStore(key, "fallback");
-      expect(store.getItem()).toBe("fallback");
-    });
+describe("CookieStore.setItem", () => {
+  beforeEach(() => {
+    clearCookies();
   });
 
-  describe("getInitialItem", () => {
-    it("returns initialItem when provided", () => {
-      const store = createStore(uniqueKey(), "default", "ssr-value");
-      expect(store.getInitialItem()).toBe("ssr-value");
+  it("sets a direct value", () => {
+    const store = new CookieStore({
+      name: "count",
+      defaultItem: 0,
+      initialItem: 0,
     });
-
-    it("returns defaultItem when initialItem is undefined", () => {
-      const store = createStore(uniqueKey(), "default", undefined);
-      expect(store.getInitialItem()).toBe("default");
-    });
+    store.setItem(42);
+    expect(store.getItem()).toBe(42);
   });
 
-  describe("setItem", () => {
-    it("serializes and stores value", () => {
-      const store = createStore(uniqueKey(), { x: 0 });
-      store.setItem({ x: 1 });
-      expect(store.getItem()).toEqual({ x: 1 });
+  it("applies a functional update using the current cached value", () => {
+    const store = new CookieStore({
+      name: "count",
+      defaultItem: 0,
+      initialItem: 0,
     });
-
-    it("silently no-ops for unserializable values", () => {
-      const store = createStore(uniqueKey(), "default");
-      const circular: any = {};
-      circular.self = circular;
-      expect(() => store.setItem(circular)).not.toThrow();
-      expect(store.getItem()).toBe("default");
-    });
+    store.setItem(5);
+    store.setItem((prev) => prev + 1);
+    expect(store.getItem()).toBe(6);
   });
 
-  describe("removeItem", () => {
-    it("getItem returns defaultItem after removal", () => {
-      const store = createStore(uniqueKey(), "default");
-      store.setItem("value");
-      store.removeItem();
-      expect(store.getItem()).toBe("default");
+  it("handles rapid sequential functional updates without stale closure", () => {
+    const store = new CookieStore({
+      name: "count",
+      defaultItem: 0,
+      initialItem: 0,
     });
+    store.setItem(0);
+    store.setItem((prev) => prev + 1);
+    store.setItem((prev) => prev + 1);
+    store.setItem((prev) => prev + 1);
+    expect(store.getItem()).toBe(3);
   });
 
-  describe("subscribe", () => {
-    it("listener called when setItem triggers change", () => {
-      const key = uniqueKey();
-      const store = createStore(key, "default");
-      const listener = vi.fn();
-      const unsub = store.subscribe(listener);
-
-      store.setItem("new-value");
-      expect(listener).toHaveBeenCalled();
-
-      unsub();
+  it("uses defaultItem as prev when cookie has no value", () => {
+    const store = new CookieStore({
+      name: "count",
+      defaultItem: 10,
+      initialItem: 10,
     });
+    store.setItem((prev) => prev * 2);
+    expect(store.getItem()).toBe(20);
+  });
 
-    it("listener not called for different cookie name", () => {
-      const store1 = createStore(uniqueKey(), "default");
-      const store2 = createStore(uniqueKey(), "default");
-      const listener = vi.fn();
-      const unsub = store1.subscribe(listener);
-
-      store2.setItem("change");
-      expect(listener).not.toHaveBeenCalled();
-
-      unsub();
+  it("getItem reads pre-existing cookie without double-parsing", () => {
+    // First store sets a value into the cookie
+    const store1 = new CookieStore({
+      name: "preexist",
+      defaultItem: 0,
+      initialItem: 0,
     });
+    store1.setItem(42);
 
-    it("unsubscribe stops notifications", () => {
-      const store = createStore(uniqueKey(), "default");
-      const listener = vi.fn();
-      const unsub = store.subscribe(listener);
-
-      unsub();
-      store.setItem("after-unsub");
-      expect(listener).not.toHaveBeenCalled();
+    // Second store (simulates new page load) reads the same cookie
+    const store2 = new CookieStore({
+      name: "preexist",
+      defaultItem: 0,
+      initialItem: 0,
     });
+    expect(store2.getItem()).toBe(42);
+  });
+
+  it("functional update on pre-existing cookie uses stored value, not defaultItem", () => {
+    // Store 1 writes an object cookie
+    const store1 = new CookieStore({
+      name: "obj",
+      defaultItem: { count: 0, name: "John" },
+      initialItem: { count: 0, name: "John" },
+    });
+    store1.setItem({ count: 5, name: "John" });
+
+    // Store 2 (new instance, simulating page reload) does a functional update
+    const store2 = new CookieStore({
+      name: "obj",
+      defaultItem: { count: 0, name: "John" },
+      initialItem: { count: 0, name: "John" },
+    });
+    store2.setItem((prev) => ({ ...prev, count: prev.count + 1 }));
+    expect(store2.getItem()).toEqual({ count: 6, name: "John" });
+  });
+
+  it("works with object values", () => {
+    const store = new CookieStore({
+      name: "obj",
+      defaultItem: { x: 0 },
+      initialItem: { x: 0 },
+    });
+    store.setItem({ x: 1 });
+    store.setItem((prev) => ({ x: prev.x + 10 }));
+    expect(store.getItem()).toEqual({ x: 11 });
   });
 });

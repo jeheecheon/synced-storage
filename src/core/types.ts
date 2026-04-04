@@ -7,7 +7,7 @@ export type Store<TItem = any> = {
   subscribe: (listener: Listener) => Unsubscriber;
   getItem: () => TItem;
   getInitialItem: () => TItem;
-  setItem: (item: TItem) => void;
+  setItem: (item: TItem | ((prev: TItem) => TItem)) => void;
   removeItem: () => void;
 };
 

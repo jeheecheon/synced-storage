@@ -10,7 +10,7 @@ type CountAndName = {
 const CookieStatePreview = () => {
   const [countAndName, setCountAndName] = useCookieState<CountAndName>(
     "countAndName",
-    { count: 0, name: "John" }
+    { count: 0, name: "John" },
   );
 
   return (

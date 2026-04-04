@@ -1,14 +1,12 @@
 "use client";
 
 import {
-  type SetStateAction,
   useCallback,
   useContext,
   useLayoutEffect,
   useState,
 } from "react";
 import { type StorageStoreOption } from "@/core/types";
-import { isFunction } from "@/utils/misc";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
 
 function useStorageStore<TValue>(
@@ -36,11 +34,10 @@ export function useStorageState<TValue>(
 
   const [state, _setState] = useState(store.getInitialItem());
   const setState = useCallback(
-    (action: SetStateAction<TValue>) => {
-      const next = isFunction(action) ? action(state) : action;
-      store.setItem(next);
+    (action: TValue | ((prev: TValue) => TValue)) => {
+      store.setItem(action);
     },
-    [store, state]
+    [store]
   );
 
   useLayoutEffect(() => {
