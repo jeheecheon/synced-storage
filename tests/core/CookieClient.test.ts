@@ -38,9 +38,7 @@ describe("CookieClient", () => {
     });
 
     it("falls back to defaultItem for invalid JSON in ssrCookies", () => {
-      const client = new CookieClient([
-        { name: "k", value: "not-json" },
-      ]);
+      const client = new CookieClient([{ name: "k", value: "not-json" }]);
       const store = client.getOrCreateStore("k", "fallback");
       expect(store.getInitialItem()).toBe("fallback");
     });

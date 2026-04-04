@@ -1,7 +1,10 @@
 import { describe, it, expect, assert, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { useContext } from "react";
-import { SyncedStorageProvider, SyncedStorageContext } from "@/react/SyncedStorageProvider";
+import {
+  SyncedStorageProvider,
+  SyncedStorageContext,
+} from "@/react/SyncedStorageProvider";
 
 function TestConsumer() {
   const ctx = useContext(SyncedStorageContext);
@@ -19,7 +22,7 @@ describe("SyncedStorageProvider", () => {
     render(
       <SyncedStorageProvider>
         <span data-testid="child">hello</span>
-      </SyncedStorageProvider>
+      </SyncedStorageProvider>,
     );
     expect(screen.getByTestId("child").textContent).toBe("hello");
   });
@@ -28,7 +31,7 @@ describe("SyncedStorageProvider", () => {
     render(
       <SyncedStorageProvider>
         <TestConsumer />
-      </SyncedStorageProvider>
+      </SyncedStorageProvider>,
     );
     expect(screen.getByTestId("ctx").textContent).toBe("provided");
   });
@@ -43,9 +46,11 @@ describe("SyncedStorageProvider", () => {
     }
 
     render(
-      <SyncedStorageProvider ssrCookies={[{ name: "k", value: JSON.stringify("ssr-val") }]}>
+      <SyncedStorageProvider
+        ssrCookies={[{ name: "k", value: JSON.stringify("ssr-val") }]}
+      >
         <SsrConsumer />
-      </SyncedStorageProvider>
+      </SyncedStorageProvider>,
     );
     expect(screen.getByTestId("val").textContent).toBe("ssr-val");
   });

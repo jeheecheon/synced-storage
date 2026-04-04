@@ -72,8 +72,12 @@ function PersonDetails() {
 
   return (
     <div>
-      <p>{person.name}, {person.age}</p>
-      <button onClick={() => setPerson(prev => ({ ...prev, age: prev.age + 1 }))}>
+      <p>
+        {person.name}, {person.age}
+      </p>
+      <button
+        onClick={() => setPerson((prev) => ({ ...prev, age: prev.age + 1 }))}
+      >
         +1
       </button>
     </div>
@@ -96,7 +100,11 @@ function ThemeToggle() {
   return (
     <div>
       <p>{theme}</p>
-      <button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
+      <button
+        onClick={() =>
+          setTheme((prev) => (prev === "light" ? "dark" : "light"))
+        }
+      >
         Toggle theme
       </button>
     </div>
@@ -106,17 +114,17 @@ function ThemeToggle() {
 
 ## Exports
 
-| Entry point | Contents |
-|---|---|
-| `synced-storage/core` | `CookieClient`, `StorageClient`, `CookieStore`, `StorageStore` |
-| `synced-storage/react` | `useCookieState`, `useStorageState`, `SyncedStorageProvider` |
+| Entry point            | Contents                                                       |
+| ---------------------- | -------------------------------------------------------------- |
+| `synced-storage/core`  | `CookieClient`, `StorageClient`, `CookieStore`, `StorageStore` |
+| `synced-storage/react` | `useCookieState`, `useStorageState`, `SyncedStorageProvider`   |
 
 ## Examples
 
-| Example | Stack | What it shows |
-|---|---|---|
-| [`example/nextjs/`](./example/nextjs) | Next.js 16 + React | SSR cookie hydration, `useCookieState`, `useStorageState` |
-| [`example/plain/`](./example/plain) | Vanilla JS (no build) | `CookieClient`, `StorageClient` — open `index.html` to navigate; 3 pages, CDN import via importmap |
+| Example                               | Stack                 | What it shows                                                                                      |
+| ------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------- |
+| [`example/nextjs/`](./example/nextjs) | Next.js 16 + React    | SSR cookie hydration, `useCookieState`, `useStorageState`                                          |
+| [`example/plain/`](./example/plain)   | Vanilla JS (no build) | `CookieClient`, `StorageClient` — open `index.html` to navigate; 3 pages, CDN import via importmap |
 
 ## License
 

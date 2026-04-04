@@ -19,7 +19,7 @@ export class CookieClient extends BaseStoreClient {
   public getOrCreateStore<TItem = unknown>(
     key: string,
     defaultItem: TItem,
-    option?: CookieStoreOption
+    option?: CookieStoreOption,
   ): Readonly<Store<TItem>> {
     const store = this.storeCache.get(key);
     if (store) {
@@ -36,7 +36,7 @@ export class CookieClient extends BaseStoreClient {
         defaultItem,
         initialItem,
       },
-      option
+      option,
     );
     this.storeCache.set(key, newStore);
 

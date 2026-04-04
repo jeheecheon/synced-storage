@@ -73,7 +73,11 @@ Abstract base for both clients. Enforces the `storeCache` and `getOrCreateStore`
 ```typescript
 abstract class BaseStoreClient<TItem = unknown> {
   protected abstract readonly storeCache: Map<string, Readonly<Store<TItem>>>;
-  public abstract getOrCreateStore(key, defaultItem, option): Readonly<Store<TItem>>;
+  public abstract getOrCreateStore(
+    key,
+    defaultItem,
+    option,
+  ): Readonly<Store<TItem>>;
 }
 ```
 
@@ -140,9 +144,12 @@ Both hooks follow the same pattern:
 const setState = (action) => _setState(store.getItem());
 
 // CORRECT — React's own updater receives the latest value
-const setState = useCallback((action) => {
-  store.setItem(action); // store fires listener → _setState(value)
-}, [store]);
+const setState = useCallback(
+  (action) => {
+    store.setItem(action); // store fires listener → _setState(value)
+  },
+  [store],
+);
 ```
 
 The store is the write path; React state is the read path.
@@ -183,10 +190,10 @@ Client: useLayoutEffect → store.getItem() (live cookie) → _setState if chang
 
 ## Exports
 
-| Entry point | Contents |
-|---|---|
-| `synced-storage/core` | `CookieClient`, `StorageClient`, `CookieStore`, `StorageStore`, `Store`, `BaseStoreClient` |
-| `synced-storage/react` | `useCookieState`, `useStorageState`, `SyncedStorageProvider` |
+| Entry point            | Contents                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| `synced-storage/core`  | `CookieClient`, `StorageClient`, `CookieStore`, `StorageStore`, `Store`, `BaseStoreClient` |
+| `synced-storage/react` | `useCookieState`, `useStorageState`, `SyncedStorageProvider`                               |
 
 Both entries ship ESM (`.mjs`) + CJS (`.js`) + TypeScript declarations. `sideEffects: false` enables tree-shaking.
 
@@ -239,7 +246,7 @@ The core is the only dependency — no React needed.
 
 ### Q: Why dispatch a synthetic `StorageEvent` for same-tab writes?
 
-**A:** The browser only fires `window.storage` for changes made by *other* tabs. Writing from the same tab produces no event. Dispatching a synthetic one unifies the subscription model: all subscribers use `window.addEventListener("storage", ...)` regardless of which tab triggered the change.
+**A:** The browser only fires `window.storage` for changes made by _other_ tabs. Writing from the same tab produces no event. Dispatching a synthetic one unifies the subscription model: all subscribers use `window.addEventListener("storage", ...)` regardless of which tab triggered the change.
 
 ### Q: Why cache stores in the client instead of the hook?
 

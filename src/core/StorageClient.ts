@@ -16,7 +16,7 @@ export class StorageClient extends BaseStoreClient {
   public getOrCreateStore<TItem = unknown>(
     key: string,
     defaultItem: TItem,
-    option?: StorageStoreOption
+    option?: StorageStoreOption,
   ): Readonly<Store<TItem>> {
     const strategy = option?.strategy ?? "localStorage";
     const storeKey = `${strategy}-${key}`;
