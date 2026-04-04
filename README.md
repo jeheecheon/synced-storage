@@ -94,7 +94,7 @@ function ThemeToggle() {
   });
 
   return (
-    <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+    <button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
       Toggle theme
     </button>
   );
