@@ -94,7 +94,8 @@ function ThemeToggle() {
   });
 
   return (
-    <div data-theme={theme}>
+    <div>
+      <p>{theme}</p>
       <button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
         Toggle theme
       </button>
