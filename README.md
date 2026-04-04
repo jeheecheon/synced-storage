@@ -110,18 +110,14 @@ function ThemeToggle() {
 
 ## Examples
 
-| Folder | Stack | What it shows |
-|---|---|---|
-| [`example/nextjs/`](./example/nextjs) | Next.js 16 + React | SSR cookie hydration, `useCookieState`, `useStorageState` |
-| [`example/plain/`](./example/plain) | Vite + vanilla JS | `CookieClient`, `StorageClient`, expiry — no framework |
+| Example | Stack | What it shows | Open |
+|---|---|---|---|
+| [`example/nextjs/`](./example/nextjs) | Next.js 16 + React | SSR cookie hydration, `useCookieState`, `useStorageState` | [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/jeheecheon/synced-storage?startScript=dev:nextjs) |
+| [`example/plain/`](./example/plain) | Vite + vanilla JS | `CookieClient`, `StorageClient`, expiry — no framework | [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/jeheecheon/synced-storage?startScript=dev:plain) |
 
-**Next.js example:**
+**Run locally:**
 ```bash
 pnpm --filter example-nextjs dev   # http://localhost:3000
-```
-
-**Plain JS example:**
-```bash
 pnpm --filter example-plain dev    # http://localhost:5173
 ```
 

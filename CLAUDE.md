@@ -13,6 +13,8 @@ pnpm dev              # Watch mode (tsup)
 pnpm build            # Production build (ESM + CJS + .d.ts)
 pnpm clean            # Remove dist/
 pnpm package:publish  # Build + publish to npm
+pnpm dev:nextjs       # Build + start Next.js example :3000 (used by StackBlitz)
+pnpm dev:plain        # Build + start Vite plain example :5173 (used by StackBlitz)
 ```
 
 Example apps (`./example/nextjs/`, `./example/plain/`):

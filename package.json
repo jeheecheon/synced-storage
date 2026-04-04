@@ -23,7 +23,9 @@
     "build": "tsup",
     "test": "vitest",
     "clean": "rm -rf dist",
-    "package:publish": "pnpm build && pnpm publish --access public --no-git-checks"
+    "package:publish": "pnpm build && pnpm publish --access public --no-git-checks",
+    "dev:nextjs": "pnpm build && pnpm --filter example-nextjs dev",
+    "dev:plain": "pnpm build && pnpm --filter example-plain dev"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
