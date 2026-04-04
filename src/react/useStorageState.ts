@@ -1,24 +1,19 @@
 "use client";
 
-import {
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { useCallback, useContext, useLayoutEffect, useState } from "react";
 import { type StorageStoreOption } from "@/core/types";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
 
 function useStorageStore<TValue>(
   key: string,
   defaultValue: TValue,
-  option?: StorageStoreOption
+  option?: StorageStoreOption,
 ) {
   const context = useContext(SyncedStorageContext);
 
   if (!context) {
     throw new Error(
-      "useStorageState must be used within a SyncedStorageProvider"
+      "useStorageState must be used within a SyncedStorageProvider",
     );
   }
 
@@ -28,7 +23,7 @@ function useStorageStore<TValue>(
 export function useStorageState<TValue>(
   key: string,
   defaultValue: TValue,
-  option?: StorageStoreOption
+  option?: StorageStoreOption,
 ) {
   const store = useStorageStore(key, defaultValue, option);
 
@@ -37,14 +32,14 @@ export function useStorageState<TValue>(
     (action: TValue | ((prev: TValue) => TValue)) => {
       store.setItem(action);
     },
-    [store]
+    [store],
   );
 
   useLayoutEffect(() => {
     _setState(store.getItem());
 
-    return store.subscribe(() => {
-      _setState(store.getItem());
+    return store.subscribe((value) => {
+      _setState(value);
     });
   }, [store]);
 

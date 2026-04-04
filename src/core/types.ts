@@ -1,10 +1,10 @@
 import { CookieSetOptions } from "universal-cookie";
 
-export type Listener = () => void;
+export type Listener<TItem = any> = (newValue: TItem) => void;
 export type Unsubscriber = () => void;
 
 export type Store<TItem = any> = {
-  subscribe: (listener: Listener) => Unsubscriber;
+  subscribe: (listener: Listener<TItem>) => Unsubscriber;
   getItem: () => TItem;
   getInitialItem: () => TItem;
   setItem: (item: TItem | ((prev: TItem) => TItem)) => void;
@@ -25,6 +25,6 @@ export abstract class BaseStoreClient<TItem = unknown> {
   public abstract getOrCreateStore(
     key: string,
     defaultItem: TItem,
-    option: unknown
+    option: unknown,
   ): Readonly<Store<TItem>>;
 }

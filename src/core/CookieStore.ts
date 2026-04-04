@@ -22,7 +22,7 @@ export class CookieStore<TItem> implements Store<TItem> {
       defaultItem: TItem;
       initialItem: TItem;
     },
-    option?: CookieStoreOption
+    option?: CookieStoreOption,
   ) {
     this.name = args.name;
     this.option = option;
@@ -31,7 +31,7 @@ export class CookieStore<TItem> implements Store<TItem> {
     this.cookies = new Cookies(undefined, option);
   }
 
-  public subscribe(listener: Listener): Unsubscriber {
+  public subscribe(listener: Listener<TItem>): Unsubscriber {
     const handler = (options: CookieChangeOptions) => {
       if (options.name !== this.name) {
         return;
@@ -39,7 +39,7 @@ export class CookieStore<TItem> implements Store<TItem> {
 
       const deserialized = safelyGet<TItem>(() => JSON.parse(options.value));
       this.cachedItem = deserialized ?? this.defaultItem;
-      listener();
+      listener(this.cachedItem);
     };
 
     this.cookies.addChangeListener(handler);

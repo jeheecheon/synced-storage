@@ -1,24 +1,19 @@
 "use client";
 
-import {
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { useCallback, useContext, useLayoutEffect, useState } from "react";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
 import { type CookieStoreOption } from "@/core/types";
 
 function useCookieStore<TValue>(
   key: string,
   defaultValue: TValue,
-  option?: CookieStoreOption
+  option?: CookieStoreOption,
 ) {
   const context = useContext(SyncedStorageContext);
 
   if (!context) {
     throw new Error(
-      "useCookieState must be used within a SyncedStorageProvider"
+      "useCookieState must be used within a SyncedStorageProvider",
     );
   }
 
@@ -28,7 +23,7 @@ function useCookieStore<TValue>(
 export function useCookieState<TValue>(
   key: string,
   defaultValue: TValue,
-  option?: CookieStoreOption
+  option?: CookieStoreOption,
 ) {
   const store = useCookieStore(key, defaultValue, option);
 
@@ -37,14 +32,14 @@ export function useCookieState<TValue>(
     (action: TValue | ((prev: TValue) => TValue)) => {
       store.setItem(action);
     },
-    [store]
+    [store],
   );
 
   useLayoutEffect(() => {
     _setState(store.getItem());
 
-    return store.subscribe(() => {
-      _setState(store.getItem());
+    return store.subscribe((value) => {
+      _setState(value);
     });
   }, [store]);
 
