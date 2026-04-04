@@ -15,120 +15,31 @@
       h1 {
         font-size: 1rem;
         color: #888;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
       }
-      .cards {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-      }
-      .card {
-        border: 1px solid #333;
-        border-radius: 6px;
-        padding: 1.25rem;
-        width: 220px;
+      ul {
+        list-style: none;
+        padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
-      }
-      .label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #666;
-      }
-      .value {
-        font-size: 1.6rem;
-        font-weight: bold;
-        min-height: 2rem;
-        word-break: break-all;
-      }
-      .actions {
-        display: flex;
         gap: 0.5rem;
-        flex-wrap: wrap;
       }
-      button {
-        font-family: monospace;
-        font-size: 0.75rem;
-        padding: 0.3rem 0.7rem;
-        border: 1px solid #444;
-        background: #1e1e1e;
-        color: #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #2a2a2a;
-      }
-      input {
-        font-family: monospace;
-        font-size: 0.8rem;
-        background: #1a1a1a;
-        border: 1px solid #444;
-        color: #eee;
-        border-radius: 4px;
-        padding: 0.3rem 0.5rem;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .bar-wrap {
-        height: 3px;
-        background: #222;
-        border-radius: 2px;
-        overflow: hidden;
-      }
-      .bar {
-        height: 100%;
-        background: #10b981;
-        width: 0%;
-        transition: width 0.3s linear;
-      }
-      .cookie .value {
-        color: #fbbf24;
-      }
-      .local .value {
+      a {
         color: #818cf8;
+        text-decoration: none;
+        font-size: 0.9rem;
       }
-      .session .value {
-        color: #34d399;
+      a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
     <h1>synced-storage / core demo</h1>
-    <div class="cards">
-      <div class="card cookie">
-        <div class="label">Cookie</div>
-        <div class="value" id="cookie-val">0</div>
-        <div class="actions">
-          <button id="c-inc">+1</button>
-          <button id="c-dec">-1</button>
-          <button id="c-reset">reset</button>
-        </div>
-      </div>
-      <div class="card local">
-        <div class="label">localStorage</div>
-        <div class="value" id="local-val" style="font-size: 1rem">—</div>
-        <input id="local-input" placeholder="type and save…" />
-        <div class="actions">
-          <button id="l-save">save</button>
-          <button id="l-clear">clear</button>
-        </div>
-      </div>
-      <div class="card session">
-        <div class="label">sessionStorage (15s expiry)</div>
-        <div class="value" id="session-val" style="font-size: 1rem">—</div>
-        <div class="bar-wrap"><div class="bar" id="bar"></div></div>
-        <div class="actions">
-          <button id="s-set">set + 15s expiry</button>
-          <button id="s-reset">reset</button>
-        </div>
-      </div>
-    </div>
-
-    <script type="module" src="./cookie.js"></script>
-    <script type="module" src="./local-storage.js"></script>
-    <script type="module" src="./session-storage.js"></script>
+    <ul>
+      <li><a href="./cookie.html">Cookie</a></li>
+      <li><a href="./local-storage.html">localStorage</a></li>
+      <li><a href="./session-storage.html">sessionStorage (15s expiry)</a></li>
+    </ul>
   </body>
 </html>
