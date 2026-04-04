@@ -95,8 +95,11 @@
       </div>
     </div>
 
+    <script type="importmap">
+      { "imports": { "synced-storage/core": "https://esm.sh/synced-storage@latest/core" } }
+    </script>
     <script type="module">
-      import { StorageClient } from "https://esm.sh/synced-storage@latest/core";
+      import { StorageClient } from "synced-storage/core";
 
       const client = new StorageClient();
       const store = client.getOrCreateStore("demo-ls-counter", 0, {
