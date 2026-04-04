@@ -74,6 +74,7 @@ el("local-clear").addEventListener("click", () => {
 
 const EXPIRY_MS = 15_000;
 let timerInterval: ReturnType<typeof setInterval> | null = null;
+let expiryTimeout: ReturnType<typeof setTimeout> | null = null;
 let expiryAt: number | null = null;
 
 const sessionStore = storageClient.getOrCreateStore<string>(
@@ -83,14 +84,14 @@ const sessionStore = storageClient.getOrCreateStore<string>(
 );
 
 sessionStore.subscribe((value) => {
-  el("session-value").textContent = value || "(expired / empty)";
+  el("session-value").textContent = value || "—";
   el("session-meta").textContent = `Last updated: ${stamp()}`;
 });
 
 // Render initial value
 el("session-value").textContent = sessionStore.getItem() || "—";
 
-function startTimer() {
+function startProgressBar() {
   if (timerInterval !== null) {
     clearInterval(timerInterval);
   }
@@ -110,31 +111,26 @@ function startTimer() {
       clearInterval(timerInterval!);
       timerInterval = null;
       expiryAt = null;
-      el("session-meta").textContent = `Expired at: ${stamp()}`;
     }
   }, 200);
 }
 
 el("session-set").addEventListener("click", () => {
-  const newStore = storageClient.getOrCreateStore<string>(
-    `demo-session-${Date.now()}`,
-    `Set at ${stamp()}`,
-    {
-      strategy: "sessionStorage",
-      expires: new Date(Date.now() + EXPIRY_MS),
-    },
-  );
+  // Cancel any in-flight expiry so re-clicking resets the timer cleanly
+  if (expiryTimeout !== null) {
+    clearTimeout(expiryTimeout);
+  }
 
-  // Update the display store too so subscribe fires
   sessionStore.setItem(`Set at ${stamp()}`);
+  startProgressBar();
 
-  startTimer();
-
-  // After expiry, clear display
-  setTimeout(() => {
+  // After EXPIRY_MS, remove the item — subscriber fires and updates the display
+  expiryTimeout = setTimeout(() => {
+    expiryTimeout = null;
     sessionStore.removeItem();
+    // Override the generic "—" from the subscriber with a more informative label
     el("session-value").textContent = "(expired)";
-    newStore.removeItem();
+    el("session-meta").textContent = `Expired at: ${stamp()}`;
   }, EXPIRY_MS);
 });
 
@@ -144,9 +140,15 @@ el("session-reset").addEventListener("click", () => {
     timerInterval = null;
   }
 
+  if (expiryTimeout !== null) {
+    clearTimeout(expiryTimeout);
+    expiryTimeout = null;
+  }
+
   expiryAt = null;
   el("timer-bar").style.width = "0%";
   sessionStore.removeItem();
+  // Override subscriber output with "—" for the reset state
   el("session-value").textContent = "—";
   el("session-meta").textContent = `Reset at: ${stamp()}`;
 });
