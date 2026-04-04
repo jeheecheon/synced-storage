@@ -113,12 +113,12 @@ function ThemeToggle() {
 | Example | Stack | What it shows | Open |
 |---|---|---|---|
 | [`example/nextjs/`](./example/nextjs) | Next.js 16 + React | SSR cookie hydration, `useCookieState`, `useStorageState` | [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/jeheecheon/synced-storage?startScript=dev:nextjs) |
-| [`example/plain/`](./example/plain) | Vite + vanilla JS | `CookieClient`, `StorageClient`, expiry — no framework | [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/jeheecheon/synced-storage?startScript=dev:plain) |
+| [`example/plain/index.html`](./example/plain/index.html) | Vanilla JS (no build) | `CookieClient`, `StorageClient`, expiry — CDN import, open directly in browser | — |
 
 **Run locally:**
 ```bash
 pnpm --filter example-nextjs dev   # http://localhost:3000
-pnpm --filter example-plain dev    # http://localhost:5173
+# plain: just open example/plain/index.html in a browser
 ```
 
 ## License

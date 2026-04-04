@@ -14,19 +14,17 @@ pnpm build            # Production build (ESM + CJS + .d.ts)
 pnpm clean            # Remove dist/
 pnpm package:publish  # Build + publish to npm
 pnpm dev:nextjs       # Build + start Next.js example :3000 (used by StackBlitz)
-pnpm dev:plain        # Build + start Vite plain example :5173 (used by StackBlitz)
 ```
 
-Example apps (`./example/nextjs/`, `./example/plain/`):
+Next.js example (`./example/nextjs/`):
 
 ```bash
 pnpm --filter example-nextjs dev     # Next.js dev server :3000
 pnpm --filter example-nextjs build
 pnpm --filter example-nextjs lint    # ESLint (only in example-nextjs)
-
-pnpm --filter example-plain dev      # Vite dev server :5173
-pnpm --filter example-plain build
 ```
+
+Plain example (`./example/plain/`): single `index.html`, no build step. Open directly in a browser or via any static server.
 
 No root-level linter configured.
 
@@ -55,7 +53,7 @@ Reactive store pattern. Both store types implement `Store<TItem>` (`subscribe`, 
 
 ## Tooling
 
-- **pnpm** workspace (root + `./example/nextjs/` + `./example/plain/`)
+- **pnpm** workspace (root + `./example/nextjs/`)
 - **tsup** — ESM + CJS, declarations, source maps, no minification
 - **TypeScript** — strict, ES2020, `@/*` → `src/*`
 - **Peer dep:** `react >=16.8.0` (optional)

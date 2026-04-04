@@ -1,269 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>synced-storage — Core Demo</title>
-    <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>synced-storage — core demo</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; margin: 0; padding: 2rem; }
+    h1 { font-size: 1rem; color: #888; margin-bottom: 2rem; }
+    .cards { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .card { border: 1px solid #333; border-radius: 6px; padding: 1.25rem; width: 220px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; }
+    .value { font-size: 1.6rem; font-weight: bold; min-height: 2rem; word-break: break-all; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    button { font-family: monospace; font-size: 0.75rem; padding: 0.3rem 0.7rem; border: 1px solid #444; background: #1e1e1e; color: #ccc; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #2a2a2a; }
+    input { font-family: monospace; font-size: 0.8rem; background: #1a1a1a; border: 1px solid #444; color: #eee; border-radius: 4px; padding: 0.3rem 0.5rem; width: 100%; box-sizing: border-box; }
+    .bar-wrap { height: 3px; background: #222; border-radius: 2px; overflow: hidden; }
+    .bar { height: 100%; background: #10b981; width: 0%; transition: width 0.3s linear; }
+    .cookie .value { color: #fbbf24; }
+    .local .value { color: #818cf8; }
+    .session .value { color: #34d399; }
+  </style>
+</head>
+<body>
+  <h1>synced-storage / core demo</h1>
+  <div class="cards">
+    <div class="card cookie">
+      <div class="label">Cookie</div>
+      <div class="value" id="cookie-val">0</div>
+      <div class="actions">
+        <button id="c-inc">+1</button>
+        <button id="c-dec">-1</button>
+        <button id="c-reset">reset</button>
+      </div>
+    </div>
+    <div class="card local">
+      <div class="label">localStorage</div>
+      <div class="value" id="local-val" style="font-size:1rem">—</div>
+      <input id="local-input" placeholder="type and save…" />
+      <div class="actions">
+        <button id="l-save">save</button>
+        <button id="l-clear">clear</button>
+      </div>
+    </div>
+    <div class="card session">
+      <div class="label">sessionStorage (15s expiry)</div>
+      <div class="value" id="session-val" style="font-size:1rem">—</div>
+      <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+      <div class="actions">
+        <button id="s-set">set + 15s expiry</button>
+        <button id="s-reset">reset</button>
+      </div>
+    </div>
+  </div>
 
-      body {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        background: #0f0f0f;
-        color: #f0f0f0;
-        min-height: 100vh;
-      }
+  <script type="module">
+    import { CookieClient, StorageClient } from "https://esm.sh/synced-storage@1.2.0/core";
 
-      header {
-        padding: 2rem;
-        text-align: center;
-        border-bottom: 1px solid #1e1e1e;
-      }
+    // Cookie
+    const cookieClient = new CookieClient();
+    const cookieStore = cookieClient.getOrCreateStore("demo-counter", 0);
+    const cookieVal = document.getElementById("cookie-val");
+    cookieStore.subscribe(v => { cookieVal.textContent = v; });
+    document.getElementById("c-inc").onclick = () => cookieStore.setItem(cookieStore.getItem() + 1);
+    document.getElementById("c-dec").onclick = () => cookieStore.setItem(cookieStore.getItem() - 1);
+    document.getElementById("c-reset").onclick = () => cookieStore.setItem(0);
 
-      header h1 {
-        font-size: 1.25rem;
-        letter-spacing: 0.05em;
-        color: #999;
-      }
+    // localStorage
+    const storageClient = new StorageClient();
+    const localStore = storageClient.getOrCreateStore("demo-message", "", { strategy: "localStorage" });
+    const localVal = document.getElementById("local-val");
+    const localInput = document.getElementById("local-input");
+    localStore.subscribe(v => { localVal.textContent = v || "—"; });
+    document.getElementById("l-save").onclick = () => { if (localInput.value) localStore.setItem(localInput.value); };
+    document.getElementById("l-clear").onclick = () => { localStore.removeItem(); localInput.value = ""; };
 
-      header h1 span {
-        color: #f0f0f0;
-        font-weight: 700;
-      }
+    // sessionStorage with expiry
+    let sessionStore = null;
+    let barTimer = null;
+    const sessionVal = document.getElementById("session-val");
+    const bar = document.getElementById("bar");
 
-      .sections {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-      }
+    function initSessionStore(expires) {
+      if (sessionStore) { sessionStore.removeItem(); }
+      sessionStore = storageClient.getOrCreateStore("demo-session-" + Date.now(), "active!", {
+        strategy: "sessionStorage",
+        expires,
+      });
+      sessionStore.subscribe(v => {
+        sessionVal.textContent = v || "—";
+        if (!v) { bar.style.width = "0%"; }
+      });
+    }
 
-      .section {
-        padding: 2.5rem 2rem;
-        border-right: 1px solid #1e1e1e;
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-      }
+    document.getElementById("s-set").onclick = () => {
+      const expires = new Date(Date.now() + 15000);
+      initSessionStore(expires);
+      if (barTimer) clearInterval(barTimer);
+      const end = expires.getTime();
+      barTimer = setInterval(() => {
+        const left = end - Date.now();
+        if (left <= 0) { bar.style.width = "0%"; clearInterval(barTimer); return; }
+        bar.style.width = (left / 15000 * 100) + "%";
+      }, 100);
+    };
 
-      .section:last-child { border-right: none; }
-
-      .section-tag {
-        font-size: 0.65rem;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        font-weight: 700;
-        padding: 0.25rem 0.6rem;
-        border-radius: 3px;
-        display: inline-block;
-        width: fit-content;
-      }
-
-      h2 {
-        font-size: 1.3rem;
-        font-weight: 700;
-        line-height: 1.2;
-      }
-
-      .desc {
-        font-size: 0.8rem;
-        color: #888;
-        line-height: 1.6;
-      }
-
-      .value-box {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-      }
-
-      .value-label {
-        font-size: 0.65rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #666;
-        margin-bottom: 0.4rem;
-      }
-
-      .value-display {
-        font-size: 2rem;
-        font-weight: 700;
-        word-break: break-all;
-        min-height: 2.5rem;
-      }
-
-      .actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-      }
-
-      button {
-        font-family: inherit;
-        font-size: 0.8rem;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: opacity 0.15s;
-        letter-spacing: 0.03em;
-      }
-
-      button:hover { opacity: 0.8; }
-      button:active { opacity: 0.6; }
-
-      .input-row {
-        display: flex;
-        gap: 0.5rem;
-      }
-
-      .input-row input {
-        flex: 1;
-        font-family: inherit;
-        font-size: 0.85rem;
-        background: rgba(255, 255, 255, 0.07);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 5px;
-        padding: 0.5rem 0.75rem;
-        color: #f0f0f0;
-        outline: none;
-      }
-
-      .input-row input:focus {
-        border-color: rgba(255, 255, 255, 0.35);
-      }
-
-      .timer-bar-wrap {
-        height: 4px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 2px;
-        overflow: hidden;
-      }
-
-      #timer-bar {
-        height: 100%;
-        background: #10b981;
-        width: 0%;
-        transition: width 0.5s linear, background 0.5s;
-        border-radius: 2px;
-      }
-
-      .meta {
-        font-size: 0.72rem;
-        color: #666;
-      }
-
-      /* Cookie — Amber */
-      #cookie { border-left: 3px solid #f59e0b; }
-      #cookie .section-tag { background: #78350f; color: #fbbf24; }
-      #cookie .value-display { color: #fbbf24; }
-      #cookie .btn-primary { background: #f59e0b; color: #0f0f0f; }
-      #cookie .btn-secondary { background: #292524; color: #d6d3d1; }
-
-      /* localStorage — Indigo */
-      #local { border-left: 3px solid #6366f1; }
-      #local .section-tag { background: #1e1b4b; color: #818cf8; }
-      #local .value-display { color: #818cf8; }
-      #local .btn-primary { background: #6366f1; color: #fff; }
-      #local .btn-secondary { background: #1e1b4b; color: #c7d2fe; }
-
-      /* sessionStorage — Emerald */
-      #session { border-left: 3px solid #10b981; }
-      #session .section-tag { background: #064e3b; color: #34d399; }
-      #session .value-display { color: #34d399; }
-      #session .btn-primary { background: #10b981; color: #0f0f0f; }
-      #session .btn-secondary { background: #064e3b; color: #a7f3d0; }
-
-      @media (max-width: 767px) {
-        .sections {
-          grid-template-columns: 1fr;
-        }
-
-        .section {
-          border-right: none;
-          border-bottom: 1px solid #1e1e1e;
-          padding: 2rem 1.25rem;
-        }
-
-        .section:last-child { border-bottom: none; }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1><span>synced-storage</span> / core demo &mdash; plain JS</h1>
-    </header>
-
-    <main class="sections">
-
-      <!-- Cookie -->
-      <section class="section" id="cookie">
-        <span class="section-tag">Cookie</span>
-        <h2>Cookie Store</h2>
-        <p class="desc">Persists across sessions. Open a new tab — the counter carries over.</p>
-
-        <div class="value-box">
-          <div class="value-label">Current value</div>
-          <div class="value-display" id="cookie-value">0</div>
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" id="cookie-inc">+ Increment</button>
-          <button class="btn-secondary" id="cookie-dec">− Decrement</button>
-          <button class="btn-secondary" id="cookie-reset">Reset</button>
-        </div>
-
-        <p class="meta" id="cookie-meta">Subscribed. Waiting for changes…</p>
-      </section>
-
-      <!-- localStorage -->
-      <section class="section" id="local">
-        <span class="section-tag">localStorage</span>
-        <h2>localStorage Store</h2>
-        <p class="desc">Persists until cleared. Cross-tab sync via native <code>StorageEvent</code>. Type a message.</p>
-
-        <div class="value-box">
-          <div class="value-label">Stored message</div>
-          <div class="value-display" id="local-value" style="font-size:1.1rem;padding-top:.4rem">—</div>
-        </div>
-
-        <div class="input-row">
-          <input id="local-input" type="text" placeholder="Type something…" maxlength="60" />
-          <button class="btn-primary" id="local-save">Save</button>
-        </div>
-
-        <div class="actions">
-          <button class="btn-secondary" id="local-clear">Clear</button>
-        </div>
-
-        <p class="meta" id="local-meta">Subscribed. Waiting for changes…</p>
-      </section>
-
-      <!-- sessionStorage -->
-      <section class="section" id="session">
-        <span class="section-tag">sessionStorage + Expiry</span>
-        <h2>sessionStorage Store</h2>
-        <p class="desc">Cleared when the tab closes. This store expires automatically after <strong>15 seconds</strong>.</p>
-
-        <div class="value-box">
-          <div class="value-label">Current value</div>
-          <div class="value-display" id="session-value" style="font-size:1rem;padding-top:.3rem">—</div>
-        </div>
-
-        <div class="timer-bar-wrap">
-          <div id="timer-bar"></div>
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" id="session-set">Set with 15s expiry</button>
-          <button class="btn-secondary" id="session-reset">Reset</button>
-        </div>
-
-        <p class="meta" id="session-meta">Subscribed. Waiting for changes…</p>
-      </section>
-
-    </main>
-
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+    document.getElementById("s-reset").onclick = () => {
+      if (sessionStore) { sessionStore.removeItem(); }
+      if (barTimer) clearInterval(barTimer);
+      bar.style.width = "0%";
+    };
+  </script>
+</body>
 </html>
