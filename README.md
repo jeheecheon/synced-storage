@@ -123,8 +123,8 @@ function ThemeToggle() {
 
 | Example                               | Stack                 | What it shows                                                                                      |
 | ------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------- |
-| [`example/nextjs/`](./example/nextjs) | Next.js 16 + React    | SSR cookie hydration, `useCookieState`, `useStorageState`                                          |
-| [`example/plain/`](./example/plain)   | Vanilla JS (no build) | `CookieClient`, `StorageClient` — open `index.html` to navigate; 3 pages, CDN import via importmap |
+| [`examples/nextjs/`](./example/nextjs) | Next.js 16 + React    | SSR cookie hydration, `useCookieState`, `useStorageState`                                          |
+| [`examples/plain/`](./example/plain)   | Vanilla JS (no build) | `CookieClient`, `StorageClient` — open `index.html` to navigate; 3 pages, CDN import via importmap |
 
 ## License
 

@@ -21,10 +21,10 @@ pnpm dev              # Watch mode (tsup)
 pnpm build            # Production build (ESM + CJS + .d.ts)
 pnpm clean            # Remove dist/
 pnpm package:publish  # Build + publish to npm
-pnpm dev:nextjs       # Build + start Next.js example :3000
+pnpm dev:nextjs       # Build + start Next.js example :3000 (examples/nextjs/)
 ```
 
-Next.js example (`./example/nextjs/`):
+Next.js example (`./examples/nextjs/`):
 
 ```bash
 pnpm --filter example-nextjs dev     # Next.js dev server :3000
@@ -32,7 +32,7 @@ pnpm --filter example-nextjs build
 pnpm --filter example-nextjs lint    # ESLint (only in example-nextjs)
 ```
 
-Plain example (`./example/plain/`): `index.html`, no build step — open directly in browser.
+Plain example (`./examples/plain/`): `index.html`, no build step — open directly in browser.
 
 ## Architecture
 
@@ -58,7 +58,7 @@ Both store types implement `Store<TItem>` (`subscribe`, `getItem`, `getInitialIt
 
 ## Tooling
 
-- **pnpm** workspace (root + `./example/nextjs/`); no root-level linter
+- **pnpm** workspace (root + `./examples/nextjs/`); no root-level linter
 - **tsup** — ESM + CJS, declarations, source maps, no minification
 - **TypeScript** — strict, ES2020, `@/*` → `src/*`
 - **Peer dep:** `react >=16.8.0` (optional)
