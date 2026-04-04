@@ -14,7 +14,7 @@ const StorageStatePreview = () => {
     {
       strategy: "localStorage",
       expires: new Date(Date.now() + 1000 * 60),
-    }
+    },
   );
 
   return (
