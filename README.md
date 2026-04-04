@@ -108,9 +108,22 @@ function ThemeToggle() {
 | `synced-storage/core` | `CookieClient`, `StorageClient`, `CookieStore`, `StorageStore` |
 | `synced-storage/react` | `useCookieState`, `useStorageState`, `SyncedStorageProvider` |
 
-## Example
+## Examples
 
-A working Next.js example lives in the [`example/`](./example) folder. It demonstrates SSR cookies, client hydration, and synced web storage.
+| Folder | Stack | What it shows |
+|---|---|---|
+| [`example/nextjs/`](./example/nextjs) | Next.js 16 + React | SSR cookie hydration, `useCookieState`, `useStorageState` |
+| [`example/plain/`](./example/plain) | Vite + vanilla JS | `CookieClient`, `StorageClient`, expiry — no framework |
+
+**Next.js example:**
+```bash
+pnpm --filter example-nextjs dev   # http://localhost:3000
+```
+
+**Plain JS example:**
+```bash
+pnpm --filter example-plain dev    # http://localhost:5173
+```
 
 ## License
 

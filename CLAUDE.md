@@ -15,12 +15,15 @@ pnpm clean            # Remove dist/
 pnpm package:publish  # Build + publish to npm
 ```
 
-Example app (Next.js, `./example/`):
+Example apps (`./example/nextjs/`, `./example/plain/`):
 
 ```bash
-pnpm --filter example dev     # Dev server :3000
-pnpm --filter example build
-pnpm --filter example lint    # ESLint (only in example)
+pnpm --filter example-nextjs dev     # Next.js dev server :3000
+pnpm --filter example-nextjs build
+pnpm --filter example-nextjs lint    # ESLint (only in example-nextjs)
+
+pnpm --filter example-plain dev      # Vite dev server :5173
+pnpm --filter example-plain build
 ```
 
 No root-level linter configured.
@@ -50,7 +53,7 @@ Reactive store pattern. Both store types implement `Store<TItem>` (`subscribe`, 
 
 ## Tooling
 
-- **pnpm** workspace (root + `./example/`)
+- **pnpm** workspace (root + `./example/nextjs/` + `./example/plain/`)
 - **tsup** — ESM + CJS, declarations, source maps, no minification
 - **TypeScript** — strict, ES2020, `@/*` → `src/*`
 - **Peer dep:** `react >=16.8.0` (optional)

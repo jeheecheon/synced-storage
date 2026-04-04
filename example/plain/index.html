@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>synced-storage — Core Demo</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        background: #0f0f0f;
+        color: #f0f0f0;
+        min-height: 100vh;
+      }
+
+      header {
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid #333;
+      }
+
+      header h1 {
+        font-size: 1.25rem;
+        letter-spacing: 0.05em;
+        color: #999;
+      }
+
+      header h1 span {
+        color: #f0f0f0;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0;
+        min-height: calc(100vh - 81px);
+      }
+
+      /* ── Section base ── */
+      .section {
+        padding: 2.5rem 2rem;
+        border-right: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .section:last-child { border-right: none; }
+
+      .section-tag {
+        font-size: 0.65rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-weight: 700;
+        padding: 0.25rem 0.6rem;
+        border-radius: 3px;
+        display: inline-block;
+        width: fit-content;
+      }
+
+      .section h2 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .section p.desc {
+        font-size: 0.8rem;
+        color: #888;
+        line-height: 1.6;
+      }
+
+      .value-box {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+      }
+
+      .value-label {
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 0.4rem;
+      }
+
+      .value-display {
+        font-size: 2rem;
+        font-weight: 700;
+        word-break: break-all;
+        min-height: 2.5rem;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: opacity 0.15s;
+        letter-spacing: 0.03em;
+      }
+
+      button:hover { opacity: 0.8; }
+      button:active { opacity: 0.6; }
+
+      /* ── Cookie section — Amber ── */
+      #cookie .section-tag { background: #78350f; color: #fbbf24; }
+      #cookie { border-top: 3px solid #f59e0b; }
+      #cookie .value-display { color: #fbbf24; }
+      #cookie .btn-primary { background: #f59e0b; color: #0f0f0f; }
+      #cookie .btn-secondary { background: #292524; color: #d6d3d1; }
+
+      /* ── localStorage section — Indigo ── */
+      #local .section-tag { background: #1e1b4b; color: #818cf8; }
+      #local { border-top: 3px solid #6366f1; }
+      #local .value-display { color: #818cf8; }
+      #local .btn-primary { background: #6366f1; color: #fff; }
+      #local .btn-secondary { background: #1e1b4b; color: #c7d2fe; }
+
+      /* ── sessionStorage section — Emerald ── */
+      #session .section-tag { background: #064e3b; color: #34d399; }
+      #session { border-top: 3px solid #10b981; }
+      #session .value-display { color: #34d399; }
+      #session .btn-primary { background: #10b981; color: #0f0f0f; }
+      #session .btn-secondary { background: #064e3b; color: #a7f3d0; }
+
+      .input-row {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .input-row input {
+        flex: 1;
+        font-family: inherit;
+        font-size: 0.85rem;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 5px;
+        padding: 0.5rem 0.75rem;
+        color: #f0f0f0;
+        outline: none;
+      }
+
+      .input-row input:focus {
+        border-color: rgba(255,255,255,0.35);
+      }
+
+      .timer-bar-wrap {
+        height: 4px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      #timer-bar {
+        height: 100%;
+        background: #10b981;
+        width: 0%;
+        transition: width 0.5s linear, background 0.5s;
+        border-radius: 2px;
+      }
+
+      .meta {
+        font-size: 0.72rem;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><span>synced-storage</span> / core demo &mdash; plain JS</h1>
+    </header>
+
+    <main class="grid">
+      <!-- ── Cookie ── -->
+      <section class="section" id="cookie">
+        <span class="section-tag">Cookie</span>
+        <div>
+          <h2>Cookie Store</h2>
+          <p class="desc" style="margin-top:.5rem">
+            Persists across sessions. Syncs via cookie.<br>
+            Open a new tab — the counter carries over.
+          </p>
+        </div>
+
+        <div class="value-box">
+          <div class="value-label">Current value</div>
+          <div class="value-display" id="cookie-value">0</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="cookie-inc">+ Increment</button>
+          <button class="btn-secondary" id="cookie-dec">− Decrement</button>
+          <button class="btn-secondary" id="cookie-reset">Reset</button>
+        </div>
+
+        <p class="meta" id="cookie-meta">Subscribed. Waiting for changes…</p>
+      </section>
+
+      <!-- ── localStorage ── -->
+      <section class="section" id="local">
+        <span class="section-tag">localStorage</span>
+        <div>
+          <h2>localStorage Store</h2>
+          <p class="desc" style="margin-top:.5rem">
+            Persists until cleared. Cross-tab sync via<br>
+            native <code>StorageEvent</code>. Type a message.
+          </p>
+        </div>
+
+        <div class="value-box">
+          <div class="value-label">Stored message</div>
+          <div class="value-display" id="local-value" style="font-size:1.1rem;padding-top:.4rem">—</div>
+        </div>
+
+        <div class="input-row">
+          <input id="local-input" type="text" placeholder="Type something…" maxlength="60" />
+          <button class="btn-primary" id="local-save">Save</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn-secondary" id="local-clear">Clear</button>
+        </div>
+
+        <p class="meta" id="local-meta">Subscribed. Waiting for changes…</p>
+      </section>
+
+      <!-- ── sessionStorage ── -->
+      <section class="section" id="session">
+        <span class="section-tag">sessionStorage + Expiry</span>
+        <div>
+          <h2>sessionStorage Store</h2>
+          <p class="desc" style="margin-top:.5rem">
+            Cleared when the tab closes. This store<br>
+            expires automatically after <strong>15 seconds</strong>.
+          </p>
+        </div>
+
+        <div class="value-box">
+          <div class="value-label">Current value</div>
+          <div class="value-display" id="session-value" style="font-size:1rem;padding-top:.3rem">—</div>
+        </div>
+
+        <div class="timer-bar-wrap">
+          <div id="timer-bar"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="session-set">Set with 15s expiry</button>
+          <button class="btn-secondary" id="session-reset">Reset</button>
+        </div>
+
+        <p class="meta" id="session-meta">Subscribed. Waiting for changes…</p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

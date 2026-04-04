@@ -1,3 +1,4 @@
 packages:
   - ./
-  - example/
+  - example/nextjs/
+  - example/plain/
