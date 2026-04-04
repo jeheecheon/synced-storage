@@ -94,9 +94,11 @@ function ThemeToggle() {
   });
 
   return (
-    <button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
-      Toggle theme
-    </button>
+    <div data-theme={theme}>
+      <button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
+        Toggle theme
+      </button>
+    </div>
   );
 }
 ```
