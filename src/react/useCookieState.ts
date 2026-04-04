@@ -41,10 +41,12 @@ export function useCookieState<TValue>(
   );
 
   useLayoutEffect(() => {
+    _setState(store.getItem());
+
     return store.subscribe(() => {
       _setState(store.getItem());
     });
-  }, []);
+  }, [store]);
 
   return [state, setState] as const;
 }

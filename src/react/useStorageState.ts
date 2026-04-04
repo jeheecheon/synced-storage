@@ -46,7 +46,7 @@ export function useStorageState<TValue>(
     return store.subscribe(() => {
       _setState(store.getItem());
     });
-  }, []);
+  }, [store]);
 
   return [state, setState] as const;
 }
