@@ -121,8 +121,8 @@
       const store = client.getOrCreateStore("demo-counter", 0);
       const val = document.getElementById("cookie-val");
 
-      store.subscribe((v) => {
-        val.textContent = v;
+      store.subscribe((value) => {
+        val.textContent = value;
       });
 
       document.getElementById("c-inc").onclick = () =>
