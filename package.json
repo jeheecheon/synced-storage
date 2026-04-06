@@ -26,10 +26,15 @@
     "package:publish": "pnpm build && pnpm publish --access public --no-git-checks",
     "dev:nextjs": "pnpm build && pnpm --filter example-nextjs dev"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/core/index.js",
+  "module": "dist/core/index.mjs",
+  "types": "dist/core/index.d.ts",
   "exports": {
+    ".": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js"
+    },
     "./core": {
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.mjs",
