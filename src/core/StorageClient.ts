@@ -5,6 +5,12 @@ import {
 } from "@/core/types";
 import { StorageStore } from "@/core/StorageStore";
 
+/**
+ * Factory that creates and caches `StorageStore` instances.
+ *
+ * Stores are cached by `${strategy}-${key}`, so the same key under
+ * `localStorage` and `sessionStorage` yields separate store instances.
+ */
 export class StorageClient extends BaseStoreClient {
   protected readonly storeCache: Map<string, Readonly<Store>>;
 
