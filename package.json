@@ -31,14 +31,17 @@
   "types": "dist/index.d.ts",
   "exports": {
     "./core": {
+      "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.mjs",
       "require": "./dist/core/index.js"
     },
     "./react": {
+      "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.js"
     }
   },
+  "files": ["dist", "README.md"],
   "sideEffects": false,
   "dependencies": {
     "universal-cookie": "^8.0.1"
