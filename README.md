@@ -1,5 +1,11 @@
 # Synced Storage
 
+[![npm version](https://img.shields.io/npm/v/synced-storage)](https://www.npmjs.com/package/synced-storage)
+[![npm downloads](https://img.shields.io/npm/dm/synced-storage)](https://www.npmjs.com/package/synced-storage)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/synced-storage)](https://bundlephobia.com/package/synced-storage)
+[![license](https://img.shields.io/npm/l/synced-storage)](https://github.com/jeheecheon/synced-storage/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
 Battle-tested, framework-agnostic utility for syncing **cookies**, **localStorage**, and **sessionStorage** with application state. Ships with first-class React bindings — adapters for Svelte, SolidJS, and Vue are on the way.
 
 ## Features
