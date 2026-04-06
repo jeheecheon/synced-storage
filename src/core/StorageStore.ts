@@ -25,6 +25,11 @@ export class StorageStore<TItem> implements Store<TItem> {
     if (this.expires && isBrowser()) {
       const leftTime = this.expires.getTime() - Date.now();
 
+      if (leftTime <= 0) {
+        this.isExpired = true;
+        return;
+      }
+
       setTimeout(() => {
         this.setItem(this.defaultItem);
         this.isExpired = true;
