@@ -116,6 +116,7 @@ function ThemeToggle() {
 
 | Entry point            | Contents                                                       |
 | ---------------------- | -------------------------------------------------------------- |
+| `synced-storage`       | Same as `synced-storage/core`                                  |
 | `synced-storage/core`  | `CookieClient`, `StorageClient`, `CookieStore`, `StorageStore` |
 | `synced-storage/react` | `useCookieState`, `useStorageState`, `SyncedStorageProvider`   |
 
