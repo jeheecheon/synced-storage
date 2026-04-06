@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/synced-storage)](https://www.npmjs.com/package/synced-storage)
 [![npm downloads](https://img.shields.io/npm/dm/synced-storage)](https://www.npmjs.com/package/synced-storage)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/synced-storage)](https://bundlephobia.com/package/synced-storage)
+[![bundle size](https://deno.bundlejs.com/badge?q=synced-storage&treeshake=[*])](https://bundlejs.com/?q=synced-storage&treeshake=[*])
 [![license](https://img.shields.io/npm/l/synced-storage)](https://github.com/jeheecheon/synced-storage/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
