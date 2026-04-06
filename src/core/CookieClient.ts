@@ -1,16 +1,23 @@
 import {
   type CookieStoreOption,
+  type CookieItem,
   type Store,
   BaseStoreClient,
 } from "@/core/types";
 import { safelyGet } from "@/utils/misc";
 import { CookieStore } from "@/core/CookieStore";
 
+/**
+ * Factory that creates and caches `CookieStore` instances.
+ *
+ * Pass `initialCookies` (from the server's `Cookie` header) to enable
+ * SSR hydration — the parsed value is used as each store's initial item.
+ */
 export class CookieClient extends BaseStoreClient {
-  private readonly initialCookies: CookieListItem[];
+  private readonly initialCookies: CookieItem[];
   protected readonly storeCache: Map<string, Readonly<Store>>;
 
-  constructor(initialCookies?: CookieListItem[]) {
+  constructor(initialCookies?: CookieItem[]) {
     super();
     this.initialCookies = initialCookies ?? [];
     this.storeCache = new Map();
@@ -27,8 +34,9 @@ export class CookieClient extends BaseStoreClient {
     }
 
     const cookie = this.initialCookies.find((cookie) => cookie.name === key);
-    const initialItem =
-      safelyGet<TItem>(() => JSON.parse(cookie?.value!)) ?? defaultItem;
+    const initialItem = cookie?.value
+      ? (safelyGet<TItem>(() => JSON.parse(cookie.value)) ?? defaultItem)
+      : defaultItem;
 
     const newStore = new CookieStore<TItem>(
       {

@@ -3,6 +3,12 @@ import { CookieSetOptions } from "universal-cookie";
 export type Listener<TItem = any> = (newValue: TItem) => void;
 export type Unsubscriber = () => void;
 
+/**
+ * Unified interface for cookie and web storage stores.
+ *
+ * Both `CookieStore` and `StorageStore` implement this interface,
+ * so callers never need to know which backend they are using.
+ */
 export type Store<TItem = any> = {
   subscribe: (listener: Listener<TItem>) => Unsubscriber;
   getItem: () => TItem;
@@ -18,6 +24,12 @@ export type CookieStoreOption = { strategy: "cookie" } & CookieSetOptions;
 export type StorageStoreOption = {
   strategy: "localStorage" | "sessionStorage";
   expires?: Date;
+};
+
+/** A simple cookie key-value pair, typically from SSR cookie headers. */
+export type CookieItem = {
+  name: string;
+  value: string;
 };
 
 export abstract class BaseStoreClient<TItem = unknown> {
