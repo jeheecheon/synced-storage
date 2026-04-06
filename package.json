@@ -1,6 +1,6 @@
 {
   "name": "synced-storage",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A small, framework‑agnostic utility for syncing cookies, localStorage, and sessionStorage with application state.",
   "keywords": [
     "cookies",
@@ -8,7 +8,18 @@
     "sessionStorage",
     "sync",
     "react",
-    "next.js"
+    "next.js",
+    "state-management",
+    "cross-tab",
+    "cross-tab-sync",
+    "ssr",
+    "ssr-hydration",
+    "hooks",
+    "react-hooks",
+    "storage",
+    "web-storage",
+    "typescript",
+    "framework-agnostic"
   ],
   "author": "jeheecheon",
   "license": "MIT",
