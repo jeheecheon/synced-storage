@@ -5,7 +5,7 @@ import type {
   Unsubscriber,
 } from "@/core/types";
 import { type Optional } from "@/types/misc";
-import { isFunction, safelyGet } from "@/utils/misc";
+import { isFunction } from "@/utils/misc";
 import Cookies, { type CookieChangeOptions } from "universal-cookie";
 
 export class CookieStore<TItem> implements Store<TItem> {
@@ -37,9 +37,9 @@ export class CookieStore<TItem> implements Store<TItem> {
         return;
       }
 
-      const deserialized = safelyGet<TItem>(() => JSON.parse(options.value));
-      this.cachedItem = deserialized ?? this.defaultItem;
-      listener(this.cachedItem);
+      const value: TItem = options.value ?? this.defaultItem;
+      this.cachedItem = value;
+      listener(value);
     };
 
     this.cookies.addChangeListener(handler);
@@ -60,14 +60,9 @@ export class CookieStore<TItem> implements Store<TItem> {
 
   public setItem(item: TItem | ((prev: TItem) => TItem)): void {
     const next = isFunction(item) ? item(this.getItem()) : item;
-    const serialized = safelyGet(() => JSON.stringify(next));
-
-    if (!serialized) {
-      return;
-    }
 
     this.cachedItem = next;
-    this.cookies.set(this.name, serialized, this.option);
+    this.cookies.set(this.name, next, this.option);
   }
 
   public removeItem(): void {
