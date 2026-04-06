@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useContext, useLayoutEffect, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
+import { useIsomorphicLayoutEffect } from "@/react/useIsomorphicLayoutEffect";
 import { type CookieStoreOption } from "@/core/types";
 
 function useCookieStore<TValue>(
@@ -20,6 +21,14 @@ function useCookieStore<TValue>(
   return context.cookieClient.getOrCreateStore(key, defaultValue, option);
 }
 
+/**
+ * React hook that syncs component state with a browser cookie.
+ *
+ * @param key - Cookie name.
+ * @param defaultValue - Fallback value when the cookie does not exist or cannot be parsed.
+ * @param option - Cookie options forwarded to `universal-cookie` (path, domain, expires, etc.).
+ * @returns A `[state, setState]` tuple, similar to `useState`.
+ */
 export function useCookieState<TValue>(
   key: string,
   defaultValue: TValue,
@@ -35,7 +44,7 @@ export function useCookieState<TValue>(
     [store],
   );
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     _setState(store.getItem());
 
     return store.subscribe((value) => {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useContext, useLayoutEffect, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { type StorageStoreOption } from "@/core/types";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
+import { useIsomorphicLayoutEffect } from "@/react/useIsomorphicLayoutEffect";
 
 function useStorageStore<TValue>(
   key: string,
@@ -20,6 +21,14 @@ function useStorageStore<TValue>(
   return context.storageClient.getOrCreateStore(key, defaultValue, option);
 }
 
+/**
+ * React hook that syncs component state with `localStorage` or `sessionStorage`.
+ *
+ * @param key - Storage key.
+ * @param defaultValue - Fallback value when the key does not exist or cannot be parsed.
+ * @param option - Storage options (`strategy`, optional `expires`).
+ * @returns A `[state, setState]` tuple, similar to `useState`.
+ */
 export function useStorageState<TValue>(
   key: string,
   defaultValue: TValue,
@@ -35,7 +44,7 @@ export function useStorageState<TValue>(
     [store],
   );
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     _setState(store.getItem());
 
     return store.subscribe((value) => {
