@@ -38,6 +38,10 @@ export class StorageStore<TItem> implements Store<TItem> {
   }
 
   public subscribe(listener: Listener<TItem>): Unsubscriber {
+    if (!isBrowser()) {
+      return () => {};
+    }
+
     const handler = (event: StorageEvent) => {
       if (event.key !== this.key) {
         return;
@@ -53,6 +57,10 @@ export class StorageStore<TItem> implements Store<TItem> {
   }
 
   public getItem(): TItem {
+    if (!isBrowser()) {
+      return this.cachedItem ?? this.defaultItem;
+    }
+
     if (this.cachedItem === undefined) {
       const serialized = this.getStorage().getItem(this.key);
       const deserialized = safelyGet<TItem>(() => JSON.parse(serialized!));
@@ -67,6 +75,10 @@ export class StorageStore<TItem> implements Store<TItem> {
   }
 
   public setItem(item: TItem | ((prev: TItem) => TItem)): void {
+    if (!isBrowser()) {
+      return;
+    }
+
     const next = isFunction(item) ? item(this.getItem()) : item;
     const serialized = safelyGet(() => JSON.stringify(next));
 
@@ -91,6 +103,10 @@ export class StorageStore<TItem> implements Store<TItem> {
   }
 
   public removeItem(): void {
+    if (!isBrowser()) {
+      return;
+    }
+
     const event = new StorageEvent("storage", {
       key: this.key,
       newValue: undefined,
