@@ -6,7 +6,17 @@
 [![license](https://img.shields.io/npm/l/synced-storage)](https://github.com/jeheecheon/synced-storage/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Battle-tested, framework-agnostic utility for syncing **cookies**, **localStorage**, and **sessionStorage** with application state. Ships with first-class React bindings — adapters for Svelte, SolidJS, and Vue are on the way.
+Framework-agnostic utility for syncing **cookies**, **localStorage**, and **sessionStorage** with application state. Ships with first-class React bindings — adapters for Svelte, SolidJS, and Vue are on the way.
+
+## Why?
+
+Client-side storage is invisible to the server. When UI state lives in `localStorage`, SSR renders the default state and the client corrects it after hydration, causing a visible layout shift — a sidebar the user collapsed last visit snaps shut after first paint.
+
+`synced-storage` treats cookies as state the server can read. Pass the request's cookies to the provider, and the server renders the same initial state the client hydrates with.
+
+Note that reading request cookies opts a route into dynamic rendering (`cookies()` in Next.js disables static rendering and ISR for that route), so SSR cookie hydration fits pages that are already rendered per-request. For static pages, keep the state in `localStorage` and accept the client-side correction.
+
+For state that doesn't need SSR, the same API syncs `localStorage` across tabs and `localStorage`/`sessionStorage` within a tab.
 
 ## Features
 
@@ -19,6 +29,7 @@ Battle-tested, framework-agnostic utility for syncing **cookies**, **localStorag
 - **Tiny footprint** — single production dependency (`universal-cookie`)
 - **Tree-shakeable** — ESM + CJS with `sideEffects: false`
 - **Fully typed** — written in TypeScript with exported declarations
+- **Tested** — core stores and React hooks covered with Vitest + Testing Library
 
 ## Installation
 
@@ -55,7 +66,8 @@ export default async function RootLayout({ children }) {
   return (
     <html>
       <body>
-        {/* ssrCookies is optional — only needed in SSR environments */}
+        {/* ssrCookies lets the server render with the client's cookie state,
+            preventing hydration mismatch and layout shift (optional — SSR only) */}
         <SyncedStorageProvider ssrCookies={(await cookies()).getAll()}>
           {children}
         </SyncedStorageProvider>
