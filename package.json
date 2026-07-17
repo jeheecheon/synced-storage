@@ -1,6 +1,6 @@
 {
   "name": "synced-storage",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A small, framework‑agnostic utility for syncing cookies, localStorage, and sessionStorage with application state.",
   "keywords": [
     "cookies",
