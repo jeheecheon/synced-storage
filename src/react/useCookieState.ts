@@ -4,6 +4,7 @@ import { useCallback, useContext, useState } from "react";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
 import { useIsomorphicLayoutEffect } from "@/react/useIsomorphicLayoutEffect";
 import { type CookieStoreOption } from "@/core/types";
+import { isEqual } from "@/utils/misc";
 
 function useCookieStore<TValue>(
   key: string,
@@ -45,10 +46,11 @@ export function useCookieState<TValue>(
   );
 
   useIsomorphicLayoutEffect(() => {
-    _setState(store.getItem());
+    const item = store.getItem();
+    _setState((prev) => (isEqual(prev, item) ? prev : item));
 
     return store.subscribe((value) => {
-      _setState(value);
+      _setState((prev) => (isEqual(prev, value) ? prev : value));
     });
   }, [store]);
 

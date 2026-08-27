@@ -4,7 +4,7 @@ import { CookieClient } from "@/core/CookieClient";
 import { StorageClient } from "@/core/StorageClient";
 import { type CookieItem } from "@/core/types";
 import { type Nullable } from "@/types/misc";
-import { createContext, useMemo, type FC, type PropsWithChildren } from "react";
+import { createContext, useRef, type FC, type PropsWithChildren } from "react";
 
 type SyncedStorageState = {
   cookieClient: CookieClient;
@@ -30,20 +30,17 @@ export const SyncedStorageProvider: FC<PropsWithChildren<Props>> = ({
   ssrCookies,
   children,
 }) => {
-  const client = useMemo(() => {
-    return {
-      cookie: new CookieClient(ssrCookies),
-      storage: new StorageClient(),
+  const clientRef = useRef<Nullable<SyncedStorageState>>(null);
+
+  if (!clientRef.current) {
+    clientRef.current = {
+      cookieClient: new CookieClient(ssrCookies),
+      storageClient: new StorageClient(),
     };
-  }, [ssrCookies]);
+  }
 
   return (
-    <SyncedStorageContext.Provider
-      value={{
-        cookieClient: client.cookie,
-        storageClient: client.storage,
-      }}
-    >
+    <SyncedStorageContext.Provider value={clientRef.current}>
       {children}
     </SyncedStorageContext.Provider>
   );

@@ -70,4 +70,65 @@ describe("useStorageState", () => {
     });
     expect(result.current[0]).toBe(3);
   });
+
+  it("does not cause extra re-renders or effect re-triggers on mount with object state", () => {
+    let renderCount = 0;
+    let effectTriggerCount = 0;
+
+    function TestComponent() {
+      const [state] = useStorageState("user", { name: "Alice", age: 20 });
+      renderCount++;
+
+      React.useEffect(() => {
+        effectTriggerCount++;
+      }, [state]);
+
+      return <div>{state.name}</div>;
+    }
+
+    renderHook(() => null, {
+      wrapper: () => (
+        <SyncedStorageProvider>
+          <TestComponent />
+        </SyncedStorageProvider>
+      ),
+    });
+
+    expect(renderCount).toBe(1);
+    expect(effectTriggerCount).toBe(1);
+  });
+
+  it("does not cause extra re-renders on mount when storage already contains equal object", () => {
+    const existing = { name: "Alice", roles: ["admin"] };
+    localStorage.setItem("user", JSON.stringify(existing));
+
+    let renderCount = 0;
+    let effectTriggerCount = 0;
+
+    function TestComponent() {
+      const [state] = useStorageState("user", {
+        name: "Alice",
+        roles: ["admin"],
+      });
+      renderCount++;
+
+      React.useEffect(() => {
+        effectTriggerCount++;
+      }, [state]);
+
+      return <div>{state.name}</div>;
+    }
+
+    renderHook(() => null, {
+      wrapper: () => (
+        <SyncedStorageProvider>
+          <TestComponent />
+        </SyncedStorageProvider>
+      ),
+    });
+
+    expect(renderCount).toBe(1);
+    expect(effectTriggerCount).toBe(1);
+  });
 });
+

@@ -59,4 +59,37 @@ describe("SyncedStorageProvider", () => {
     render(<TestConsumer />);
     expect(screen.getByTestId("ctx").textContent).toBe("null");
   });
+
+  it("maintains stable client instances when ssrCookies prop reference changes on parent rerender", () => {
+    let capturedCtx1: any;
+    let capturedCtx2: any;
+
+    function Consumer({ renderId }: { renderId: number }) {
+      const ctx = useContext(SyncedStorageContext);
+      if (renderId === 1) {
+        capturedCtx1 = ctx;
+      } else {
+        capturedCtx2 = ctx;
+      }
+      return <div>{ctx?.cookieClient ? "ready" : "none"}</div>;
+    }
+
+    const { rerender } = render(
+      <SyncedStorageProvider ssrCookies={[{ name: "k", value: "1" }]}>
+        <Consumer renderId={1} />
+      </SyncedStorageProvider>,
+    );
+
+    // Re-render with new array reference
+    rerender(
+      <SyncedStorageProvider ssrCookies={[{ name: "k", value: "1" }]}>
+        <Consumer renderId={2} />
+      </SyncedStorageProvider>,
+    );
+
+    expect(capturedCtx1).toBe(capturedCtx2);
+    expect(capturedCtx1.cookieClient).toBe(capturedCtx2.cookieClient);
+    expect(capturedCtx1.storageClient).toBe(capturedCtx2.storageClient);
+  });
 });
+

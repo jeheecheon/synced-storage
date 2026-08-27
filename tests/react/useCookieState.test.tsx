@@ -73,4 +73,65 @@ describe("useCookieState", () => {
     });
     expect(result.current[0]).toBe(3);
   });
+
+  it("does not cause extra re-renders or effect re-triggers on mount with object state", () => {
+    let renderCount = 0;
+    let effectTriggerCount = 0;
+
+    function TestComponent() {
+      const [state] = useCookieState("user", { name: "Alice", age: 20 });
+      renderCount++;
+
+      React.useEffect(() => {
+        effectTriggerCount++;
+      }, [state]);
+
+      return <div>{state.name}</div>;
+    }
+
+    renderHook(() => null, {
+      wrapper: () => (
+        <SyncedStorageProvider>
+          <TestComponent />
+        </SyncedStorageProvider>
+      ),
+    });
+
+    expect(renderCount).toBe(1);
+    expect(effectTriggerCount).toBe(1);
+  });
+
+  it("does not cause extra re-renders when initialized with SSR cookies for object state", () => {
+    let renderCount = 0;
+    let effectTriggerCount = 0;
+
+    const initialData = { name: "Alice", items: [1, 2, 3] };
+    const serialized = encodeURIComponent(JSON.stringify(initialData));
+    document.cookie = `user=${serialized}; path=/`;
+
+    const ssrCookies = [{ name: "user", value: serialized }];
+
+    function TestComponent() {
+      const [state] = useCookieState("user", { name: "", items: [] });
+      renderCount++;
+
+      React.useEffect(() => {
+        effectTriggerCount++;
+      }, [state]);
+
+      return <div>{state.name}</div>;
+    }
+
+    renderHook(() => null, {
+      wrapper: () => (
+        <SyncedStorageProvider ssrCookies={ssrCookies}>
+          <TestComponent />
+        </SyncedStorageProvider>
+      ),
+    });
+
+    expect(renderCount).toBe(1);
+    expect(effectTriggerCount).toBe(1);
+  });
 });
+
