@@ -37,6 +37,20 @@ describe("CookieClient", () => {
       expect(store.getInitialItem()).toEqual({ x: 1 });
     });
 
+    it("getInitialItem returns parsed value from ssrCookies with URL encoded JSON", () => {
+      const data = { status: "on", count: 123, message: "안녕하세요 🚀" };
+      const encoded = encodeURIComponent(JSON.stringify(data));
+      const client = new CookieClient([{ name: "k", value: encoded }]);
+      const store = client.getOrCreateStore("k", { status: "off", count: 0, message: "" });
+      expect(store.getInitialItem()).toEqual(data);
+    });
+
+    it("falls back to defaultItem for malformed URI sequence in ssrCookies", () => {
+      const client = new CookieClient([{ name: "k", value: "%E0%A4%A" }]);
+      const store = client.getOrCreateStore("k", "fallback");
+      expect(store.getInitialItem()).toBe("fallback");
+    });
+
     it("falls back to defaultItem for invalid JSON in ssrCookies", () => {
       const client = new CookieClient([{ name: "k", value: "not-json" }]);
       const store = client.getOrCreateStore("k", "fallback");
