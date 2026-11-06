@@ -1,6 +1,6 @@
 # Architecture
 
-**Last Updated:** April 4, 2026
+**Last Updated:** November 6, 2026
 **Architecture:** Two-Layer Library (Framework-Agnostic Core + Framework Bindings)
 
 ---
@@ -14,7 +14,7 @@
 1. **Framework isolation:** The core has zero framework dependencies. It can run in Node, a Web Worker, or any future runtime.
 2. **Single interface:** `CookieStore` and `StorageStore` both implement `Store<TItem>` — callers never need to know which backend they're talking to.
 3. **Client as factory:** Clients (`CookieClient`, `StorageClient`) own the store cache. Same key always returns the same store instance.
-4. **React state is source of truth:** Hooks hold state in React — not in the store. This prevents stale closure bugs with functional `setState`.
+4. **Store snapshot is source of truth:** Each store caches its current snapshot (`cachedItem`) and preserves object references when values are deeply equal (`isEqual`). Functional updates (`setItem(prev => ...)`) resolve synchronously against the store's cached snapshot, and React reads the store via `useSyncExternalStore`.
 5. **Same-tab sync via synthetic events:** `StorageStore.setItem` dispatches a synthetic `StorageEvent` so all subscribers in the same tab receive updates, mirroring the native cross-tab behavior.
 
 ---
@@ -41,7 +41,7 @@ src/
 │   └── misc.ts               # Nullable<T>, Optional<T>, Maybe<T>
 │
 ├── utils/
-│   └── misc.ts               # safelyGet, isFunction, isBrowser
+│   └── misc.ts               # safelyGet, isFunction, isServer, isBrowser, isEqual
 │
 └── index.ts                  # Barrel (not a public entry point)
 ```
@@ -130,29 +130,35 @@ Both clients are instantiated here — not inside the hooks — so the store cac
 
 ### `useCookieState` / `useStorageState`
 
-Both hooks follow the same pattern:
+Both hooks wire `Store<TItem>` directly into React 18+'s `useSyncExternalStore`:
 
-1. Read the store from context via the client
-2. Initialize React state with `store.getInitialItem()` (SSR-safe: uses the hydrated value)
-3. In `useLayoutEffect`: sync to `store.getItem()` (handles any update between SSR and mount), then subscribe for future changes
-4. Return `[state, setState]` where `setState` calls `store.setItem`
-
-**Why React state, not `store.getItem()`:**
+1. Read the store from context via the client (`getOrCreateStore`).
+2. Subscribe via `useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)` where `getSnapshot` calls `store.getItem()` and `getServerSnapshot` calls `store.getInitialItem()`.
+3. Return `[state, setState]` where `setState` delegates to `store.setItem`.
 
 ```typescript
-// WRONG — stale closure: `store` captured at call time, getItem() may lag
-const setState = (action) => _setState(store.getItem());
+const subscribe = useCallback(
+  (onStoreChange: () => void) => store.subscribe(onStoreChange),
+  [store],
+);
+const getSnapshot = useCallback(() => store.getItem(), [store]);
+const getServerSnapshot = useCallback(() => store.getInitialItem(), [store]);
 
-// CORRECT — React's own updater receives the latest value
+const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
 const setState = useCallback(
-  (action) => {
-    store.setItem(action); // store fires listener → _setState(value)
+  (action: TValue | ((prev: TValue) => TValue)) => {
+    store.setItem(action);
   },
   [store],
 );
 ```
 
-The store is the write path; React state is the read path.
+**Why `useSyncExternalStore` instead of `useState` + `useLayoutEffect`:**
+
+Components mounting after client-side updates (e.g. CSR route transitions) read the live `store.getItem()` synchronously during their first render instead of rendering Frame 0 with the initial SSR value and firing passive `useEffect` hooks with stale state.
+
+Each store caches its current snapshot (`cachedItem`) and preserves object references when values are deeply equal (`isEqual`). Functional updates (`setItem(prev => ...)`) resolve synchronously against the store's cached snapshot, preventing stale closures while ensuring tear-free rendering.
 
 ---
 
@@ -165,8 +171,9 @@ setState(newVal)
   → store.setItem(newVal)
     → serialize → write to storage
     → dispatch synthetic StorageEvent
-      → store subscriber fires
-        → _setState(newVal)          ← React re-renders
+      → store subscriber fires (onStoreChange notification)
+        → store.getItem() snapshot check
+          → React re-renders
 ```
 
 ### Write (cross-tab)
@@ -174,16 +181,18 @@ setState(newVal)
 ```
 Tab A: store.setItem(newVal) → writes to localStorage
   → browser fires native StorageEvent on Tab B's window
-    → Tab B's store subscriber fires
-      → Tab B's _setState(newVal)    ← Tab B re-renders
+    → Tab B's store subscriber fires (onStoreChange notification)
+      → Tab B's store.getItem() snapshot check
+        → Tab B re-renders
 ```
 
 ### SSR Hydration (cookie)
 
 ```
 Server: CookieClient(ssrCookies) → store.getInitialItem() = parsed SSR value
-  → useCookieState: useState(store.getInitialItem())   ← no flash
-Client: useLayoutEffect → store.getItem() (live cookie) → _setState if changed
+  → useSyncExternalStore calls getServerSnapshot (store.getInitialItem())   ← no flash
+Client: useSyncExternalStore calls getSnapshot (store.getItem())
+  → preserves getInitialItem() reference if deeply equal (isEqual) → hydration completes without extra render
 ```
 
 ---
@@ -242,7 +251,7 @@ The core is the only dependency — no React needed.
 
 ### Q: Why is `getInitialItem` separate from `getItem`?
 
-**A:** For SSR cookie hydration. `getInitialItem` returns the value parsed from the server-side cookie passed to `CookieClient`. `getItem` reads the live cookie from the browser. Using `getInitialItem` for `useState` initialization prevents a hydration mismatch; `getItem` in `useLayoutEffect` syncs to the live value after mount.
+**A:** `useSyncExternalStore` takes two snapshot functions: `getServerSnapshot` (`store.getInitialItem()`) used during SSR and initial client hydration, and `getSnapshot` (`store.getItem()`) used for live client reads. `getItem()` preserves the `getInitialItem()` reference when deeply equal so hydration completes without an extra render.
 
 ### Q: Why dispatch a synthetic `StorageEvent` for same-tab writes?
 

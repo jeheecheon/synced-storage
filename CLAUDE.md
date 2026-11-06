@@ -48,8 +48,8 @@ Both store types implement `Store<TItem>` (`subscribe`, `getItem`, `getInitialIt
 ### React (`src/react/`)
 
 - **SyncedStorageProvider** — context providing both clients; accepts optional `ssrCookies`
-- **useCookieState / useStorageState** — `[state, setState]` tuples; subscribe via `useLayoutEffect`
-- Source of truth for functional `setState` is React's own state, not `store.getItem()` — prevents stale closure bugs
+- **useCookieState / useStorageState** — [state, setState] tuples; subscribe via useSyncExternalStore (getItem for client snapshot, getInitialItem for server snapshot)
+- Store caches the latest snapshot reference (cachedItem) and resolves functional setItem(prev => ...) synchronously against the store cache — prevents stale closures and stale initial renders on CSR navigation
 
 ## Exports
 
@@ -61,7 +61,7 @@ Both store types implement `Store<TItem>` (`subscribe`, `getItem`, `getInitialIt
 - **pnpm** workspace (root + `./examples/nextjs/`); no root-level linter
 - **tsup** — ESM + CJS, declarations, source maps, no minification
 - **TypeScript** — strict, ES2020, `@/*` → `src/*`
-- **Peer dep:** `react >=16.8.0` (optional)
+- **Peer dep:** `react >=18.0.0` (optional)
 
 ## Code Style
 
