@@ -34,9 +34,10 @@ export class CookieClient extends BaseStoreClient {
     }
 
     const cookie = this.initialCookies.find((cookie) => cookie.name === key);
-    const initialItem = cookie?.value
-      ? (safelyGet<TItem>(() => JSON.parse(decodeURIComponent(cookie.value))) ?? defaultItem)
-      : defaultItem;
+    const parsedCookie = cookie?.value
+      ? safelyGet<TItem>(() => JSON.parse(decodeURIComponent(cookie.value)))
+      : undefined;
+    const initialItem = parsedCookie !== undefined ? parsedCookie : defaultItem;
 
     const newStore = new CookieStore<TItem>(
       {

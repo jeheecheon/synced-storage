@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { render, renderHook, act } from "@testing-library/react";
 import React from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
 import { SyncedStorageProvider } from "@/react/SyncedStorageProvider";
 import { useCookieState } from "@/react/useCookieState";
 
@@ -132,6 +134,126 @@ describe("useCookieState", () => {
 
     expect(renderCount).toBe(1);
     expect(effectTriggerCount).toBe(1);
+  });
+
+  it("dynamic component mount after setState (CSR navigation bug regression test)", () => {
+    document.cookie = "office-mode=true; path=/";
+    const ssrCookies = [{ name: "office-mode", value: "true" }];
+
+    let updateOfficeMode!: (val: boolean) => void;
+    let mountComponentB!: () => void;
+
+    let renderCount = 0;
+    const renderedValues: boolean[] = [];
+    const effectValues: boolean[] = [];
+
+    function ComponentA() {
+      const [, setState] = useCookieState("office-mode", false);
+      updateOfficeMode = setState;
+
+      return null;
+    }
+
+    function ComponentB() {
+      const [state] = useCookieState("office-mode", false);
+      renderCount++;
+      renderedValues.push(state);
+
+      React.useEffect(() => {
+        effectValues.push(state);
+      }, [state]);
+
+      return <div>{String(state)}</div>;
+    }
+
+    function App() {
+      const [showB, setShowB] = React.useState(false);
+      mountComponentB = () => setShowB(true);
+
+      return (
+        <SyncedStorageProvider ssrCookies={ssrCookies}>
+          <ComponentA />
+          {showB && <ComponentB />}
+        </SyncedStorageProvider>
+      );
+    }
+
+    render(<App />);
+
+    act(() => {
+      updateOfficeMode(false);
+    });
+
+    act(() => {
+      mountComponentB();
+    });
+
+    expect(renderCount).toBe(1);
+    expect(renderedValues).toEqual([false]);
+    expect(effectValues).toEqual([false]);
+  });
+
+  it("SSR hydration with renderToString and hydrateRoot", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    document.cookie = `theme=${encodeURIComponent(JSON.stringify("dark"))}; path=/`;
+    const ssrCookies = [{ name: "theme", value: JSON.stringify("dark") }];
+
+    function ThemeComponent() {
+      const [theme] = useCookieState("theme", "light");
+
+      return <div data-testid="theme">{theme}</div>;
+    }
+
+    const app = (
+      <SyncedStorageProvider ssrCookies={ssrCookies}>
+        <ThemeComponent />
+      </SyncedStorageProvider>
+    );
+
+    const html = renderToString(app);
+    expect(html).toContain("dark");
+
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    document.body.appendChild(container);
+
+    let root: ReturnType<typeof hydrateRoot>;
+    act(() => {
+      root = hydrateRoot(container, app);
+    });
+
+    expect(container.textContent).toBe("dark");
+    expect(errorSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      root.unmount();
+    });
+
+    document.body.removeChild(container);
+    errorSpy.mockRestore();
+  });
+
+  it("storing and reading null cookie state when defaultValue is a non-null string", () => {
+    const { result } = renderHook(
+      () => useCookieState<string | null>("nullable-cookie", "default-value"),
+      { wrapper },
+    );
+
+    expect(result.current[0]).toBe("default-value");
+
+    act(() => {
+      result.current[1](null);
+    });
+
+    expect(result.current[0]).toBeNull();
+
+    const { result: secondResult } = renderHook(
+      () => useCookieState<string | null>("nullable-cookie", "default-value"),
+      { wrapper },
+    );
+
+    expect(secondResult.current[0]).toBeNull();
   });
 });
 

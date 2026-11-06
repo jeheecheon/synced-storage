@@ -65,6 +65,12 @@ describe("CookieClient", () => {
       expect(store.getInitialItem()).toBe("fallback");
     });
 
+    it("preserves null when SSR cookie value is JSON 'null' and defaultItem is non-null", () => {
+      const client = new CookieClient([{ name: "k", value: "null" }]);
+      const store = client.getOrCreateStore<string | null>("k", "fallback");
+      expect(store.getInitialItem()).toBeNull();
+    });
+
     it("works with no ssrCookies", () => {
       const client = new CookieClient();
       const store = client.getOrCreateStore("k", "default");

@@ -1,6 +1,6 @@
 import type { Listener, Store, Unsubscriber } from "@/core/types";
 import { type Optional } from "@/types/misc";
-import { isBrowser, isFunction, safelyGet } from "@/utils/misc";
+import { isBrowser, isEqual, isFunction, safelyGet } from "@/utils/misc";
 
 export class StorageStore<TItem> implements Store<TItem> {
   private readonly key: string;
@@ -9,6 +9,7 @@ export class StorageStore<TItem> implements Store<TItem> {
   private readonly expires?: Date;
   private isExpired: boolean;
   private cachedItem: Optional<TItem>;
+  private hasCachedItem: boolean;
 
   constructor(args: {
     key: string;
@@ -21,6 +22,7 @@ export class StorageStore<TItem> implements Store<TItem> {
     this.strategy = args.strategy;
     this.expires = args.expires;
     this.isExpired = false;
+    this.hasCachedItem = false;
 
     if (this.expires && isBrowser()) {
       const leftTime = this.expires.getTime() - Date.now();
@@ -47,27 +49,44 @@ export class StorageStore<TItem> implements Store<TItem> {
         return;
       }
 
-      const deserialized = safelyGet<TItem>(() => JSON.parse(event.newValue!));
-      this.cachedItem = deserialized ?? this.defaultItem;
-      listener(this.cachedItem);
+      const deserialized =
+        event.newValue !== null && event.newValue !== undefined
+          ? safelyGet<TItem>(() => JSON.parse(event.newValue!))
+          : undefined;
+      const next = deserialized !== undefined ? deserialized : this.defaultItem;
+
+      if (!this.hasCachedItem || !isEqual(this.cachedItem, next)) {
+        this.cachedItem = next;
+        this.hasCachedItem = true;
+      }
+
+      listener(this.cachedItem as TItem);
     };
 
     window.addEventListener("storage", handler);
+
     return () => window.removeEventListener("storage", handler);
   }
 
   public getItem(): TItem {
     if (!isBrowser()) {
-      return this.cachedItem ?? this.defaultItem;
+      return this.hasCachedItem ? (this.cachedItem as TItem) : this.defaultItem;
     }
 
-    if (this.cachedItem === undefined) {
+    if (!this.hasCachedItem) {
       const serialized = this.getStorage().getItem(this.key);
-      const deserialized = safelyGet<TItem>(() => JSON.parse(serialized!));
-      this.cachedItem = deserialized;
+      const deserialized =
+        serialized !== null
+          ? safelyGet<TItem>(() => JSON.parse(serialized))
+          : undefined;
+      const next = deserialized !== undefined ? deserialized : this.defaultItem;
+      const initial = this.getInitialItem();
+
+      this.cachedItem = isEqual(next, initial) ? initial : next;
+      this.hasCachedItem = true;
     }
 
-    return this.cachedItem ?? this.defaultItem;
+    return this.cachedItem as TItem;
   }
 
   public getInitialItem(): TItem {
@@ -79,7 +98,8 @@ export class StorageStore<TItem> implements Store<TItem> {
       return;
     }
 
-    const next = isFunction(item) ? item(this.getItem()) : item;
+    const prev = this.getItem();
+    const next = isFunction(item) ? item(prev) : item;
     const serialized = safelyGet(() => JSON.stringify(next));
 
     if (!serialized) {
@@ -91,13 +111,15 @@ export class StorageStore<TItem> implements Store<TItem> {
       return;
     }
 
+    const resolved = isEqual(prev, next) ? prev : next;
     const event = new StorageEvent("storage", {
       key: this.key,
       newValue: serialized,
-      oldValue: safelyGet(() => JSON.stringify(this.getItem())),
+      oldValue: safelyGet(() => JSON.stringify(prev)),
     });
 
-    this.cachedItem = next;
+    this.cachedItem = resolved;
+    this.hasCachedItem = true;
     this.getStorage().setItem(this.key, serialized);
     window.dispatchEvent(event);
   }
@@ -107,13 +129,15 @@ export class StorageStore<TItem> implements Store<TItem> {
       return;
     }
 
+    const prev = this.getItem();
     const event = new StorageEvent("storage", {
       key: this.key,
       newValue: undefined,
-      oldValue: safelyGet(() => JSON.stringify(this.getItem())),
+      oldValue: safelyGet(() => JSON.stringify(prev)),
     });
 
-    this.cachedItem = undefined;
+    this.cachedItem = this.defaultItem;
+    this.hasCachedItem = true;
     this.getStorage().removeItem(this.key);
     window.dispatchEvent(event);
   }

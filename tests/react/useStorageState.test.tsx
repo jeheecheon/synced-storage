@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { render, renderHook, act } from "@testing-library/react";
 import React from "react";
 import { SyncedStorageProvider } from "@/react/SyncedStorageProvider";
 import { useStorageState } from "@/react/useStorageState";
@@ -129,6 +129,112 @@ describe("useStorageState", () => {
 
     expect(renderCount).toBe(1);
     expect(effectTriggerCount).toBe(1);
+  });
+
+  it("dynamic component mount after setState (CSR navigation regression test)", () => {
+    let updateFlag!: (val: boolean) => void;
+    let mountComponentB!: () => void;
+
+    let renderCount = 0;
+    const renderedValues: boolean[] = [];
+    const effectValues: boolean[] = [];
+
+    function ComponentA() {
+      const [, setFlag] = useStorageState("flag", true);
+      updateFlag = setFlag;
+
+      return null;
+    }
+
+    function ComponentB() {
+      const [flag] = useStorageState("flag", true);
+      renderCount++;
+      renderedValues.push(flag);
+
+      React.useEffect(() => {
+        effectValues.push(flag);
+      }, [flag]);
+
+      return <div>{String(flag)}</div>;
+    }
+
+    function App() {
+      const [showB, setShowB] = React.useState(false);
+      mountComponentB = () => setShowB(true);
+
+      return (
+        <SyncedStorageProvider>
+          <ComponentA />
+          {showB && <ComponentB />}
+        </SyncedStorageProvider>
+      );
+    }
+
+    render(<App />);
+
+    act(() => {
+      updateFlag(false);
+    });
+
+    act(() => {
+      mountComponentB();
+    });
+
+    expect(renderCount).toBe(1);
+    expect(renderedValues).toEqual([false]);
+    expect(effectValues).toEqual([false]);
+  });
+
+  it("reads pre-existing localStorage value on first client render without extra renders or stale effect", () => {
+    localStorage.setItem("mode", JSON.stringify("custom"));
+
+    let renderCount = 0;
+    const renderedValues: string[] = [];
+    const effectValues: string[] = [];
+
+    function TestComponent() {
+      const [mode] = useStorageState("mode", "default");
+      renderCount++;
+      renderedValues.push(mode);
+
+      React.useEffect(() => {
+        effectValues.push(mode);
+      }, [mode]);
+
+      return <div>{mode}</div>;
+    }
+
+    render(
+      <SyncedStorageProvider>
+        <TestComponent />
+      </SyncedStorageProvider>,
+    );
+
+    expect(renderCount).toBe(1);
+    expect(renderedValues).toEqual(["custom"]);
+    expect(effectValues).toEqual(["custom"]);
+  });
+
+  it("stores and reads null storage state when defaultValue is a non-null string", () => {
+    const { result } = renderHook(
+      () => useStorageState<string | null>("nullable-key", "default-value"),
+      { wrapper },
+    );
+
+    expect(result.current[0]).toBe("default-value");
+
+    act(() => {
+      result.current[1](null);
+    });
+
+    expect(result.current[0]).toBeNull();
+
+    const { result: secondResult } = renderHook(
+      () => useStorageState<string | null>("nullable-key", "default-value"),
+      { wrapper },
+    );
+
+    expect(secondResult.current[0]).toBeNull();
   });
 });
 

@@ -72,6 +72,43 @@ describe("StorageStore.setItem", () => {
     const raw = localStorage.getItem("count");
     expect(JSON.parse(raw!)).toBe(8);
   });
+
+  it("stores and retrieves null value when defaultItem is non-null, and resets on removeItem", () => {
+    const store = new StorageStore<string | null>({
+      key: "null-test",
+      defaultItem: "default-val",
+      strategy: "localStorage",
+    });
+
+    store.setItem(null);
+    expect(store.getItem()).toBeNull();
+    expect(localStorage.getItem("null-test")).toBe("null");
+
+    const store2 = new StorageStore<string | null>({
+      key: "null-test",
+      defaultItem: "default-val",
+      strategy: "localStorage",
+    });
+    expect(store2.getItem()).toBeNull();
+
+    store.removeItem();
+    expect(store.getItem()).toBe("default-val");
+    expect(localStorage.getItem("null-test")).toBeNull();
+  });
+
+  it("returns the exact same reference as getInitialItem when localStorage deeply matches defaultItem", () => {
+    const defaultObj = { a: 1, nested: { b: 2 } };
+    localStorage.setItem("ref-test", JSON.stringify({ a: 1, nested: { b: 2 } }));
+
+    const store = new StorageStore({
+      key: "ref-test",
+      defaultItem: defaultObj,
+      strategy: "localStorage",
+    });
+
+    expect(store.getItem()).toBe(store.getInitialItem());
+    expect(store.getItem()).toBe(defaultObj);
+  });
 });
 
 describe("StorageStore.subscribe", () => {
@@ -123,6 +160,59 @@ describe("StorageStore.subscribe", () => {
     store.setItem(10);
     expect(received1).toEqual([10]);
     expect(received2).toEqual([10]);
+  });
+
+  it("delivers the exact same object reference to multiple subscribers on update", () => {
+    const store = new StorageStore<{ count: number }>({
+      key: "multi-sub-update",
+      defaultItem: { count: 0 },
+      strategy: "localStorage",
+    });
+
+    let received1: { count: number } | undefined;
+    let received2: { count: number } | undefined;
+
+    store.subscribe((val) => {
+      received1 = val;
+    });
+    store.subscribe((val) => {
+      received2 = val;
+    });
+
+    store.setItem({ count: 1 });
+
+    expect(received1).toEqual({ count: 1 });
+    expect(received2).toEqual({ count: 1 });
+    expect(received1).toBe(received2);
+  });
+
+  it("delivers the exact same object reference to multiple subscribers on cross-tab StorageEvent", () => {
+    const store = new StorageStore<{ msg: string }>({
+      key: "cross-tab",
+      defaultItem: { msg: "default" },
+      strategy: "localStorage",
+    });
+
+    let received1: { msg: string } | undefined;
+    let received2: { msg: string } | undefined;
+
+    store.subscribe((val) => {
+      received1 = val;
+    });
+    store.subscribe((val) => {
+      received2 = val;
+    });
+
+    const event = new StorageEvent("storage", {
+      key: "cross-tab",
+      newValue: JSON.stringify({ msg: "from-other-tab" }),
+      oldValue: JSON.stringify({ msg: "default" }),
+    });
+    window.dispatchEvent(event);
+
+    expect(received1).toEqual({ msg: "from-other-tab" });
+    expect(received2).toEqual({ msg: "from-other-tab" });
+    expect(received1).toBe(received2);
   });
 
   it("pushes defaultItem to listener on removeItem", () => {

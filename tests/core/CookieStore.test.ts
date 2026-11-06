@@ -106,6 +106,46 @@ describe("CookieStore.setItem", () => {
     store.setItem((prev) => ({ x: prev.x + 10 }));
     expect(store.getItem()).toEqual({ x: 11 });
   });
+
+  it("stores and retrieves null value when defaultItem is non-null", () => {
+    const store = new CookieStore<string | null>({
+      name: "null-test",
+      defaultItem: "default-val",
+      initialItem: "default-val",
+    });
+
+    store.setItem(null);
+    expect(store.getItem()).toBeNull();
+
+    const store2 = new CookieStore<string | null>({
+      name: "null-test",
+      defaultItem: "default-val",
+      initialItem: "default-val",
+    });
+    expect(store2.getItem()).toBeNull();
+
+    store.removeItem();
+    expect(store.getItem()).toBe("default-val");
+  });
+
+  it("returns the exact same reference as getInitialItem when live cookie deeply matches initialItem", () => {
+    const initialObj = { a: 1 };
+    const writerStore = new CookieStore({
+      name: "ref-test",
+      defaultItem: { a: 0 },
+      initialItem: { a: 0 },
+    });
+    writerStore.setItem({ a: 1 });
+
+    const readerStore = new CookieStore({
+      name: "ref-test",
+      defaultItem: { a: 0 },
+      initialItem: initialObj,
+    });
+
+    expect(readerStore.getItem()).toBe(readerStore.getInitialItem());
+    expect(readerStore.getItem()).toBe(initialObj);
+  });
 });
 
 describe("CookieStore.subscribe", () => {
@@ -173,6 +213,30 @@ describe("CookieStore.subscribe", () => {
     store.setItem(10);
     expect(received1).toEqual([10]);
     expect(received2).toEqual([10]);
+  });
+
+  it("delivers the exact same object reference to multiple subscribers on update", () => {
+    const store = new CookieStore<{ x: number }>({
+      name: "multi-ref",
+      defaultItem: { x: 0 },
+      initialItem: { x: 0 },
+    });
+
+    let received1: { x: number } | undefined;
+    let received2: { x: number } | undefined;
+
+    store.subscribe((value) => {
+      received1 = value;
+    });
+    store.subscribe((value) => {
+      received2 = value;
+    });
+
+    store.setItem({ x: 42 });
+
+    expect(received1).toEqual({ x: 42 });
+    expect(received2).toEqual({ x: 42 });
+    expect(received1).toBe(received2);
   });
 
   it("returns unsubscriber that stops notifications", () => {

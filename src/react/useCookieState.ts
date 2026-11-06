@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useSyncExternalStore } from "react";
 import { SyncedStorageContext } from "@/react/SyncedStorageProvider";
-import { useIsomorphicLayoutEffect } from "@/react/useIsomorphicLayoutEffect";
 import { type CookieStoreOption } from "@/core/types";
-import { isEqual } from "@/utils/misc";
 
 function useCookieStore<TValue>(
   key: string,
@@ -37,22 +35,20 @@ export function useCookieState<TValue>(
 ) {
   const store = useCookieStore(key, defaultValue, option);
 
-  const [state, _setState] = useState(store.getInitialItem());
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => store.subscribe(onStoreChange),
+    [store],
+  );
+  const getSnapshot = useCallback(() => store.getItem(), [store]);
+  const getServerSnapshot = useCallback(() => store.getInitialItem(), [store]);
+
+  const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const setState = useCallback(
     (action: TValue | ((prev: TValue) => TValue)) => {
       store.setItem(action);
     },
     [store],
   );
-
-  useIsomorphicLayoutEffect(() => {
-    const item = store.getItem();
-    _setState((prev) => (isEqual(prev, item) ? prev : item));
-
-    return store.subscribe((value) => {
-      _setState((prev) => (isEqual(prev, value) ? prev : value));
-    });
-  }, [store]);
 
   return [state, setState] as const;
 }
