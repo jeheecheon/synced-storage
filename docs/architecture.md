@@ -41,7 +41,7 @@ src/
 │   └── misc.ts               # Nullable<T>, Optional<T>, Maybe<T>
 │
 ├── utils/
-│   └── misc.ts               # safelyGet, isFunction, isServer, isBrowser, isEqual
+│   └── misc.ts               # safelyGet, isFunction, isRecord, isServer, isBrowser, isEqual
 │
 └── index.ts                  # Barrel (not a public entry point)
 ```

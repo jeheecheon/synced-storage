@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { CookieClient } from "@/core/CookieClient";
+import { type Nullable } from "@/types/misc";
 
 describe("CookieClient", () => {
   describe("getOrCreateStore", () => {
@@ -67,7 +68,7 @@ describe("CookieClient", () => {
 
     it("preserves null when SSR cookie value is JSON 'null' and defaultItem is non-null", () => {
       const client = new CookieClient([{ name: "k", value: "null" }]);
-      const store = client.getOrCreateStore<string | null>("k", "fallback");
+      const store = client.getOrCreateStore<Nullable<string>>("k", "fallback");
       expect(store.getInitialItem()).toBeNull();
     });
 

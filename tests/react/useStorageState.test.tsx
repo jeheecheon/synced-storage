@@ -3,6 +3,7 @@ import { render, renderHook, act } from "@testing-library/react";
 import React from "react";
 import { SyncedStorageProvider } from "@/react/SyncedStorageProvider";
 import { useStorageState } from "@/react/useStorageState";
+import { type Nullable } from "@/types/misc";
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(SyncedStorageProvider, null, children);
@@ -217,7 +218,7 @@ describe("useStorageState", () => {
 
   it("stores and reads null storage state when defaultValue is a non-null string", () => {
     const { result } = renderHook(
-      () => useStorageState<string | null>("nullable-key", "default-value"),
+      () => useStorageState<Nullable<string>>("nullable-key", "default-value"),
       { wrapper },
     );
 
@@ -230,7 +231,7 @@ describe("useStorageState", () => {
     expect(result.current[0]).toBeNull();
 
     const { result: secondResult } = renderHook(
-      () => useStorageState<string | null>("nullable-key", "default-value"),
+      () => useStorageState<Nullable<string>>("nullable-key", "default-value"),
       { wrapper },
     );
 

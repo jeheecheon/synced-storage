@@ -1,5 +1,6 @@
 import { afterEach, describe, it, expect, beforeEach, vi } from "vitest";
 import { StorageStore } from "@/core/StorageStore";
+import { type Nullable, type Optional } from "@/types/misc";
 
 describe("StorageStore.setItem", () => {
   beforeEach(() => {
@@ -74,7 +75,7 @@ describe("StorageStore.setItem", () => {
   });
 
   it("stores and retrieves null value when defaultItem is non-null, and resets on removeItem", () => {
-    const store = new StorageStore<string | null>({
+    const store = new StorageStore<Nullable<string>>({
       key: "null-test",
       defaultItem: "default-val",
       strategy: "localStorage",
@@ -84,7 +85,7 @@ describe("StorageStore.setItem", () => {
     expect(store.getItem()).toBeNull();
     expect(localStorage.getItem("null-test")).toBe("null");
 
-    const store2 = new StorageStore<string | null>({
+    const store2 = new StorageStore<Nullable<string>>({
       key: "null-test",
       defaultItem: "default-val",
       strategy: "localStorage",
@@ -169,8 +170,8 @@ describe("StorageStore.subscribe", () => {
       strategy: "localStorage",
     });
 
-    let received1: { count: number } | undefined;
-    let received2: { count: number } | undefined;
+    let received1: Optional<{ count: number }>;
+    let received2: Optional<{ count: number }>;
 
     store.subscribe((val) => {
       received1 = val;
@@ -193,8 +194,8 @@ describe("StorageStore.subscribe", () => {
       strategy: "localStorage",
     });
 
-    let received1: { msg: string } | undefined;
-    let received2: { msg: string } | undefined;
+    let received1: Optional<{ msg: string }>;
+    let received2: Optional<{ msg: string }>;
 
     store.subscribe((val) => {
       received1 = val;

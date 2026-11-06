@@ -1,4 +1,6 @@
-export function safelyGet<T>(callback: () => T): T | undefined {
+import { type Optional } from "@/types/misc";
+
+export function safelyGet<T>(callback: () => T): Optional<T> {
   try {
     return callback();
   } catch (e) {
@@ -19,12 +21,16 @@ export function isBrowser(): boolean {
   return typeof window === "object";
 }
 
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 export function isEqual(a: unknown, b: unknown): boolean {
   if (a === b || Object.is(a, b)) {
     return true;
   }
 
-  if (typeof a !== "object" || a === null || typeof b !== "object" || b === null) {
+  if (!isRecord(a) || !isRecord(b)) {
     return false;
   }
 
@@ -36,11 +42,13 @@ export function isEqual(a: unknown, b: unknown): boolean {
     if (!Array.isArray(b) || a.length !== b.length) {
       return false;
     }
+
     for (let i = 0; i < a.length; i++) {
       if (!isEqual(a[i], b[i])) {
         return false;
       }
     }
+
     return true;
   }
 
@@ -52,8 +60,8 @@ export function isEqual(a: unknown, b: unknown): boolean {
     return a.source === b.source && a.flags === b.flags;
   }
 
-  const keysA = Object.keys(a as object);
-  const keysB = Object.keys(b as object);
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
 
   if (keysA.length !== keysB.length) {
     return false;
@@ -63,11 +71,11 @@ export function isEqual(a: unknown, b: unknown): boolean {
     if (!Object.prototype.hasOwnProperty.call(b, key)) {
       return false;
     }
-    if (!isEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])) {
+
+    if (!isEqual(a[key], b[key])) {
       return false;
     }
   }
 
   return true;
 }
-

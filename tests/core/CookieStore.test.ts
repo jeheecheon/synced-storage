@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { CookieStore } from "@/core/CookieStore";
+import { type Nullable, type Optional } from "@/types/misc";
 
 function clearCookies() {
   document.cookie.split(";").forEach((c) => {
@@ -108,7 +109,7 @@ describe("CookieStore.setItem", () => {
   });
 
   it("stores and retrieves null value when defaultItem is non-null", () => {
-    const store = new CookieStore<string | null>({
+    const store = new CookieStore<Nullable<string>>({
       name: "null-test",
       defaultItem: "default-val",
       initialItem: "default-val",
@@ -117,7 +118,7 @@ describe("CookieStore.setItem", () => {
     store.setItem(null);
     expect(store.getItem()).toBeNull();
 
-    const store2 = new CookieStore<string | null>({
+    const store2 = new CookieStore<Nullable<string>>({
       name: "null-test",
       defaultItem: "default-val",
       initialItem: "default-val",
@@ -222,8 +223,8 @@ describe("CookieStore.subscribe", () => {
       initialItem: { x: 0 },
     });
 
-    let received1: { x: number } | undefined;
-    let received2: { x: number } | undefined;
+    let received1: Optional<{ x: number }>;
+    let received2: Optional<{ x: number }>;
 
     store.subscribe((value) => {
       received1 = value;

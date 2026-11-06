@@ -14,7 +14,7 @@ export class CookieStore<TItem> implements Store<TItem> {
   private readonly defaultItem: TItem;
   private readonly initialItem: TItem;
   private readonly option?: CookieStoreOption;
-  private cachedItem: Optional<TItem>;
+  private cachedItem: TItem;
   private hasCachedItem: boolean;
 
   constructor(
@@ -29,8 +29,9 @@ export class CookieStore<TItem> implements Store<TItem> {
     this.option = option;
     this.defaultItem = args.defaultItem;
     this.initialItem = args.initialItem;
-    this.cookies = new Cookies(undefined, option);
+    this.cachedItem = this.getInitialItem();
     this.hasCachedItem = false;
+    this.cookies = new Cookies(undefined, option);
   }
 
   public subscribe(listener: Listener<TItem>): Unsubscriber {
@@ -47,7 +48,7 @@ export class CookieStore<TItem> implements Store<TItem> {
         this.hasCachedItem = true;
       }
 
-      listener(this.cachedItem as TItem);
+      listener(this.cachedItem);
     };
 
     this.cookies.addChangeListener(handler);
@@ -57,15 +58,15 @@ export class CookieStore<TItem> implements Store<TItem> {
 
   public getItem(): TItem {
     if (!this.hasCachedItem) {
-      const raw = this.cookies.get(this.name);
-      const next = raw !== undefined ? (raw as TItem) : this.defaultItem;
+      const raw = this.cookies.get<Optional<TItem>>(this.name);
+      const next = raw !== undefined ? raw : this.defaultItem;
       const initial = this.getInitialItem();
 
       this.cachedItem = isEqual(next, initial) ? initial : next;
       this.hasCachedItem = true;
     }
 
-    return this.cachedItem as TItem;
+    return this.cachedItem;
   }
 
   public getInitialItem(): TItem {
@@ -74,10 +75,7 @@ export class CookieStore<TItem> implements Store<TItem> {
 
   public setItem(item: TItem | ((prev: TItem) => TItem)): void {
     const next = isFunction(item) ? item(this.getItem()) : item;
-    const current = this.hasCachedItem
-      ? (this.cachedItem as TItem)
-      : this.getInitialItem();
-    const resolved = isEqual(current, next) ? current : next;
+    const resolved = isEqual(this.cachedItem, next) ? this.cachedItem : next;
 
     this.cachedItem = resolved;
     this.hasCachedItem = true;

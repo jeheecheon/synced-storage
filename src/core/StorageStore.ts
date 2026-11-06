@@ -1,5 +1,4 @@
 import type { Listener, Store, Unsubscriber } from "@/core/types";
-import { type Optional } from "@/types/misc";
 import { isBrowser, isEqual, isFunction, safelyGet } from "@/utils/misc";
 
 export class StorageStore<TItem> implements Store<TItem> {
@@ -8,7 +7,7 @@ export class StorageStore<TItem> implements Store<TItem> {
   private readonly strategy: "localStorage" | "sessionStorage";
   private readonly expires?: Date;
   private isExpired: boolean;
-  private cachedItem: Optional<TItem>;
+  private cachedItem: TItem;
   private hasCachedItem: boolean;
 
   constructor(args: {
@@ -22,6 +21,7 @@ export class StorageStore<TItem> implements Store<TItem> {
     this.strategy = args.strategy;
     this.expires = args.expires;
     this.isExpired = false;
+    this.cachedItem = args.defaultItem;
     this.hasCachedItem = false;
 
     if (this.expires && isBrowser()) {
@@ -49,9 +49,10 @@ export class StorageStore<TItem> implements Store<TItem> {
         return;
       }
 
+      const { newValue } = event;
       const deserialized =
-        event.newValue !== null && event.newValue !== undefined
-          ? safelyGet<TItem>(() => JSON.parse(event.newValue!))
+        newValue !== null && newValue !== undefined
+          ? safelyGet<TItem>(() => JSON.parse(newValue))
           : undefined;
       const next = deserialized !== undefined ? deserialized : this.defaultItem;
 
@@ -60,7 +61,7 @@ export class StorageStore<TItem> implements Store<TItem> {
         this.hasCachedItem = true;
       }
 
-      listener(this.cachedItem as TItem);
+      listener(this.cachedItem);
     };
 
     window.addEventListener("storage", handler);
@@ -70,7 +71,7 @@ export class StorageStore<TItem> implements Store<TItem> {
 
   public getItem(): TItem {
     if (!isBrowser()) {
-      return this.hasCachedItem ? (this.cachedItem as TItem) : this.defaultItem;
+      return this.cachedItem;
     }
 
     if (!this.hasCachedItem) {
@@ -86,7 +87,7 @@ export class StorageStore<TItem> implements Store<TItem> {
       this.hasCachedItem = true;
     }
 
-    return this.cachedItem as TItem;
+    return this.cachedItem;
   }
 
   public getInitialItem(): TItem {

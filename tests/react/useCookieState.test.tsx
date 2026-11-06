@@ -5,6 +5,7 @@ import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 import { SyncedStorageProvider } from "@/react/SyncedStorageProvider";
 import { useCookieState } from "@/react/useCookieState";
+import { type Nullable } from "@/types/misc";
 
 function clearCookies() {
   document.cookie.split(";").forEach((c) => {
@@ -236,7 +237,7 @@ describe("useCookieState", () => {
 
   it("storing and reading null cookie state when defaultValue is a non-null string", () => {
     const { result } = renderHook(
-      () => useCookieState<string | null>("nullable-cookie", "default-value"),
+      () => useCookieState<Nullable<string>>("nullable-cookie", "default-value"),
       { wrapper },
     );
 
@@ -249,7 +250,7 @@ describe("useCookieState", () => {
     expect(result.current[0]).toBeNull();
 
     const { result: secondResult } = renderHook(
-      () => useCookieState<string | null>("nullable-cookie", "default-value"),
+      () => useCookieState<Nullable<string>>("nullable-cookie", "default-value"),
       { wrapper },
     );
 

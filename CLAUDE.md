@@ -67,6 +67,7 @@ Both store types implement `Store<TItem>` (`subscribe`, `getItem`, `getInitialIt
 
 - Early returns must use braces: `if (cond) { return; }` — never `if (cond) return;`
 - Add blank line after closing `}` before the next statement
+- Avoid type assertions (`as`) and non-null assertions (`!`)
 
 ## CLAUDE.md Editing
 

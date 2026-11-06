@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { isEqual, isFunction, isServer, isBrowser, safelyGet } from "@/utils/misc";
+import {
+  isEqual,
+  isFunction,
+  isRecord,
+  isServer,
+  isBrowser,
+  safelyGet,
+} from "@/utils/misc";
 
 describe("misc utils", () => {
   describe("isEqual", () => {
@@ -77,6 +84,17 @@ describe("misc utils", () => {
       expect(isFunction(function () {})).toBe(true);
       expect(isFunction({})).toBe(false);
       expect(isFunction(null)).toBe(false);
+    });
+  });
+
+  describe("isRecord", () => {
+    it("identifies non-null objects", () => {
+      expect(isRecord({})).toBe(true);
+      expect(isRecord({ a: 1 })).toBe(true);
+      expect(isRecord(null)).toBe(false);
+      expect(isRecord(undefined)).toBe(false);
+      expect(isRecord("str")).toBe(false);
+      expect(isRecord(123)).toBe(false);
     });
   });
 
